@@ -121,11 +121,19 @@ class TestPPRProperties:
 
     @given(st.floats(min_value=0.05, max_value=0.5))
     @settings(max_examples=20, deadline=None)
-    def test_seed_retains_the_most_mass_in_a_star(self, alpha: float) -> None:
+    def test_seeded_leaf_outranks_its_siblings_in_a_star(self, alpha: float) -> None:
+        """The seeded leaf beats the *other* leaves -- not the hub.
+
+        The hub legitimately outranks the seed here (0.459 vs 0.228): it collects
+        everything the seeded leaf emits. That asymmetry between hub and seed is
+        precisely what hub damping exists to correct, so it must not be asserted
+        away at this layer.
+        """
         pairs = [("hub", f"leaf{i}", 1.0) for i in range(5)]
         adjacency, work_ids, index = csr_from_pairs(pairs)
         ppr = personalized_pagerank(adjacency, [index["leaf0"]], alpha=alpha)
-        assert ppr[index["leaf0"]] == max(ppr)
+        for i in range(1, 5):
+            assert ppr[index["leaf0"]] > ppr[index[f"leaf{i}"]]
 
 
 class TestIngestIdempotencyProperty:

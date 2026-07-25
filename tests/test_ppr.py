@@ -80,9 +80,18 @@ class TestPersonalizedPageRank:
         assert ppr.sum() == pytest.approx(1.0, abs=1e-9)
 
     def test_seed_mass_decays_with_distance(self) -> None:
+        """Mass falls off with distance -- but measured from the seed's neighbour.
+
+        The seed itself is not guaranteed to hold the most mass. Here ``a`` has
+        degree 1, so it pushes *all* its probability to ``b`` and gets only half
+        back, leaving ``b`` ahead of the seed (0.358 vs 0.302; NetworkX agrees).
+        Asserting a monotonic decay starting at the seed would be asserting
+        something PageRank does not do on an undirected graph.
+        """
         adjacency, _, index = csr_from_pairs(LINE)
         ppr = personalized_pagerank(adjacency, [index["a"]])
-        assert ppr[index["a"]] > ppr[index["b"]] > ppr[index["c"]] > ppr[index["d"]]
+        assert ppr[index["b"]] > ppr[index["c"]] > ppr[index["d"]]
+        assert ppr[index["a"]] > ppr[index["c"]]
 
     def test_reachable_from_both_seeds_beats_reachable_from_one(self) -> None:
         """The whole point of multi-seed PPR: score against the *set*.
