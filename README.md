@@ -159,6 +159,7 @@ parameters can be retuned and the graph rebuilt without re-ingesting anything.
 | `bookmap recommend --seeds "A,B,C"` | Ranked recommendations with explanations |
 | `bookmap map --seeds "A,B" --out map.html` | Standalone HTML map |
 | `bookmap web` | Interactive map server |
+| `bookmap bridges` | Books linking two otherwise-separate reading communities |
 | `bookmap stats` | Graph size, degree distribution, communities |
 
 Write-side commands take `--temp-dir`, `--memory-limit` and `--max-temp-size`.

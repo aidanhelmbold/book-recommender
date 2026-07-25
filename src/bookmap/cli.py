@@ -26,7 +26,7 @@ from rich.table import Table
 from bookmap.config import DEFAULT_DB_PATH, GraphConfig, LayoutConfig, RecommendConfig
 from bookmap.explain import format_explanation
 from bookmap.identity import normalize_title
-from bookmap.recommend import RecommendResult
+from bookmap.recommend import RecommendResult, resolve_seeds
 from bookmap.recommend import recommend as run_recommend
 from bookmap.store.db import Store
 
@@ -952,3 +952,156 @@ def stats(db: str = DEFAULT_DB_PATH) -> None:
 
 if __name__ == "__main__":  # pragma: no cover
     app()
+
+
+# -- bridges ---------------------------------------------------------------
+
+
+def _stored_communities(store: Store, projection: GraphProjection):  # noqa: ANN202
+    """Community id per projection row, read from ``node_metrics`` in one query.
+
+    Read rather than recomputed: detection on a 2.4M-node graph is minutes of
+    work, ``build`` has already done it, and recomputing here could disagree with
+    the ids every other command reports.
+    """
+    import numpy as np
+
+    rows = store.conn.execute(
+        "SELECT work_id, community FROM node_metrics WHERE community IS NOT NULL"
+    ).fetchall()
+    if not rows:
+        _fail(
+            "no communities in this database — run 'bookmap build' first\n"
+            "  (bridges are defined between clusters, so there is nothing to "
+            "report until they exist)"
+        )
+    by_work = dict(rows)
+    # -1 marks a node build never assigned. Left distinct from any real community
+    # so such nodes cannot be mistaken for members of one, and filtered out below.
+    labels = np.fromiter(
+        (by_work.get(work_id, -1) for work_id in projection.work_ids),
+        dtype=np.int64,
+        count=projection.n_nodes,
+    )
+    return labels
+
+
+@app.command()
+def bridges(
+    db: str = DEFAULT_DB_PATH,
+    top_n: int = typer.Option(20, "--top-n", help="How many bridge books to report."),
+    seeds: str | None = typer.Option(
+        None,
+        "--seeds",
+        help="Restrict to bridges touching these books' clusters, e.g. \"Dune,Emma\".",
+    ),
+    json_out: bool = typer.Option(False, "--json", help="Emit JSON instead of a table."),
+) -> None:
+    """Find books that link two otherwise-separate reading communities.
+
+    A bridge carries an unusual share of its edge weight *across* cluster
+    boundaries. Plain similarity ranking cannot surface these -- a bridge is by
+    definition not the most similar book to either side it joins -- which is
+    exactly what makes it the useful recommendation for moving between genres.
+    """
+    from bookmap.graph.centrality import bridge_books
+    from bookmap.store.projection import project
+
+    with _open_readable(db) as store:
+        projection = project(store)
+        if projection.n_nodes == 0:
+            _fail("the graph is empty: run 'bookmap build' first")
+
+        labels = _stored_communities(store, projection)
+        community_names = store.community_labels()
+
+        seed_communities: list[int] = []
+        unresolved: list[str] = []
+        if seeds is not None:
+            matches, unresolved = resolve_seeds(_split_seeds(seeds), store)
+            seed_communities = sorted(
+                {
+                    community
+                    for match in matches
+                    if match.work_id is not None
+                    and (community := store.node_community(match.work_id)) is not None
+                }
+            )
+
+        # Over-fetch when filtering: the strongest bridges globally may touch none
+        # of the seeded clusters, and trimming after the fact would return fewer
+        # than asked for.
+        wanted = top_n * 8 if seed_communities else top_n
+        ranked = bridge_books(projection, labels, top_n=wanted)
+
+        found = []
+        for work_id, score, communities in ranked:
+            touched = tuple(community for community in communities if community >= 0)
+            if len(touched) < 2:
+                continue
+            if seed_communities and not set(touched) & set(seed_communities):
+                continue
+            found.append((work_id, score, touched))
+            if len(found) >= top_n:
+                break
+
+        books = store.get_books([work_id for work_id, _, _ in found])
+
+    payload = {
+        "seed_communities": seed_communities,
+        "unresolved": unresolved,
+        "bridges": [
+            {
+                "work_id": work_id,
+                "title": books[work_id].title if work_id in books else work_id,
+                "authors": list(books[work_id].authors) if work_id in books else [],
+                "score": score,
+                "communities": list(communities),
+                "community_labels": [
+                    community_names.get(community, "") for community in communities
+                ],
+            }
+            for work_id, score, communities in found
+        ],
+    }
+
+    if json_out:
+        typer.echo(json.dumps(payload, indent=2))
+        return
+
+    if not payload["bridges"]:
+        console.print("[yellow]no bridge books found[/yellow]")
+        if seed_communities:
+            console.print("[dim]try without --seeds, or seed books from more genres[/dim]")
+        return
+
+    if unresolved:
+        console.print(f"[yellow]could not find:[/yellow] {markup_escape(', '.join(unresolved))}")
+
+    table = Table(title="bridge books", show_lines=False)
+    table.add_column("#", justify="right")
+    table.add_column("title")
+    table.add_column("author")
+    table.add_column("score", justify="right")
+    table.add_column("connects")
+    for position, bridge in enumerate(payload["bridges"], start=1):
+        # A strong bridge in a dense graph can touch six clusters, and naming them
+        # all wraps the column into something nobody can read. Two plus a count
+        # conveys the same thing; --json carries the full list.
+        names = [
+            label or f"cluster {community}"
+            for community, label in zip(
+                bridge["communities"], bridge["community_labels"], strict=True
+            )
+        ]
+        connects = " ↔ ".join(names[:2])
+        if len(names) > 2:
+            connects += f"  +{len(names) - 2} more"
+        table.add_row(
+            str(position),
+            bridge["title"],
+            ", ".join(bridge["authors"]) or "unknown",
+            f"{bridge['score']:.3f}",
+            connects,
+        )
+    console.print(table)

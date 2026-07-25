@@ -49,13 +49,6 @@ to contrast against each other, so this may resolve itself on the full graph —
 judge from real full-run labels before adding a stopword list, since a hardcoded
 English list would be the wrong fix for a multilingual corpus.
 
-### Betweenness and bridge books are computed but never surfaced
-`graph/centrality.py` implements `approximate_betweenness` and `bridge_books`, and
-they are tested, but nothing in the CLI or the web app shows them. Bridge books —
-titles linking two otherwise-separate reading communities — are arguably the most
-interesting recommendation available and are currently invisible. `build
---betweenness` computes the metric; nothing reads it.
-
 ### Amazon and Open Library paths are untested on real data
 Both adapters are unit-tested against fixtures in the real formats, but no SNAP
 `amazon-meta.txt`, Amazon Reviews 2023 file, or live Open Library call has ever
