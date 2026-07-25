@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Any
 
 from bookmap.models import Book, Edge, EdgeKind, SourceName
-from bookmap.sources.base import FileSource, unresolved_ref
+from bookmap.sources.base import REF_ID_TYPE, FileSource, unresolved_ref
 
 WORK_ID_PREFIX = "gr-"
 """Namespace for work ids minted from a Goodreads book id.
@@ -349,11 +349,14 @@ class GoodreadsUCSDSource(FileSource):
         """
         books_added = _count_of(conn.execute(books_sql, params))
 
+        # id_type comes from REF_ID_TYPE, the same map the store resolves refs
+        # through, so an edge ref and its alias cannot disagree.
         aliases_sql = f"""
         {sql}
         INSERT INTO aliases (id_type, id_value, work_id)
         SELECT DISTINCT ON (id_type, id_value) id_type, id_value, work_id FROM (
-            SELECT 'goodreads_id' AS id_type, goodreads_id AS id_value, work_id FROM final
+            SELECT '{REF_ID_TYPE[SourceName.GOODREADS_UCSD]}' AS id_type,
+                   goodreads_id AS id_value, work_id FROM final
             UNION ALL
             SELECT 'isbn13', isbn13, work_id FROM final WHERE isbn13 IS NOT NULL
             UNION ALL

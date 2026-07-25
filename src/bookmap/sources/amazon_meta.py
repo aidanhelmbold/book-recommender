@@ -18,7 +18,7 @@ from __future__ import annotations
 from collections.abc import Iterator, Mapping
 
 from bookmap.models import Book, Edge, EdgeKind, SourceName
-from bookmap.sources.base import FileSource, unresolved_ref
+from bookmap.sources.base import REF_ID_TYPE, FileSource, unresolved_ref
 from bookmap.sources.goodreads_ucsd import (
     float_or_none,
     int_or_none,
@@ -125,7 +125,6 @@ class AmazonMetaSource(FileSource):
         title: str | None = None
         group: str | None = None
         similar: list[str] = []
-        salesrank: int | None = None
         avg_rating: float | None = None
         ratings_count: int | None = None
 
@@ -152,8 +151,6 @@ class AmazonMetaSource(FileSource):
                 title = text_or_none(value)
             elif key == "group":
                 group = value.strip().lower()
-            elif key == "salesrank":
-                salesrank = int_or_none(value)
             elif key == "similar":
                 # "similar: 5  ASIN1  ASIN2 ..." -- the leading count is
                 # redundant and occasionally disagrees with the list, so the
@@ -173,8 +170,9 @@ class AmazonMetaSource(FileSource):
                 asin=asin,
                 avg_rating=avg_rating,
                 ratings_count=ratings_count,
-                # salesrank is read but has nowhere to live on Book; it is kept
-                # out of the graph rather than smuggled into ratings_count.
+                # ``salesrank`` is skipped: Book has no field for it, and
+                # smuggling popularity into ratings_count would corrupt the
+                # hub-damping signal that reads it.
             ),
             similar,
         )
@@ -316,10 +314,13 @@ class AmazonReviews2023Source(FileSource):
         """
         books_added = _count_of(conn.execute(books_sql, [str(self.path)]))
 
+        # id_type comes from REF_ID_TYPE, the same map the store resolves refs
+        # through, so an edge ref and its alias cannot disagree.
         aliases_sql = f"""
         {self._books_cte(present)}
         INSERT INTO aliases (id_type, id_value, work_id)
-        SELECT DISTINCT ON (id_type, id_value) 'asin' AS id_type, asin AS id_value, work_id
+        SELECT DISTINCT ON (id_type, id_value)
+            '{REF_ID_TYPE[SourceName.AMAZON_REVIEWS_2023]}' AS id_type, asin AS id_value, work_id
         FROM final
         ON CONFLICT (id_type, id_value) DO UPDATE SET work_id = excluded.work_id
         """
