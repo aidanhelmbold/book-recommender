@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.hypothesis/
+
+# Graph artifacts — rebuilt from the dumps, never committed.
+*.duckdb
+*.duckdb.wal
+*.npz
+map.html
+
+# Source dumps are multi-gigabyte and research-licensed; download them yourself.
+data/dumps/
