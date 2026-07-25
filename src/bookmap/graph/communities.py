@@ -221,7 +221,12 @@ def label_communities(
         # Alphabetical tie-break keeps labels stable when scores collide, which
         # they routinely do on small clusters.
         distinctive.sort(key=lambda item: (-item[1], item[0]))
-        result[community] = " / ".join(term for term, _ in distinctive[:top_k])
+        # Every community gets a name even if its titles reduced to nothing but
+        # stopwords, so the map never renders a blank legend entry.
+        result[community] = (
+            " / ".join(term for term, _ in distinctive[:top_k])
+            or f"community {community}"
+        )
 
     return result
 

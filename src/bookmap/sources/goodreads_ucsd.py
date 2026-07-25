@@ -17,7 +17,7 @@ from __future__ import annotations
 import gzip
 import io
 import json
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 from pathlib import Path
 from typing import Any
 
@@ -221,8 +221,9 @@ class GoodreadsUCSDSource(FileSource):
         Returns ``(books_added, edges_added)``.
         """
         conn = store.conn
-        books_added = self._ingest_books_sql(conn)
-        edges_added = self._ingest_edges_sql(conn, max_rank=max_rank)
+        present = json_columns(conn, self.path)
+        books_added = self._ingest_books_sql(conn, present)
+        edges_added = self._ingest_edges_sql(conn, present, max_rank=max_rank)
         store.mark_ingest(
             self.name.value,
             str(self.path),
@@ -234,7 +235,7 @@ class GoodreadsUCSDSource(FileSource):
 
     # -- SQL fast path -----------------------------------------------------
 
-    def _ingest_books_sql(self, conn) -> int:  # noqa: ANN001
+    def _ingest_books_sql(self, conn, present: Mapping[str, str]) -> int:  # noqa: ANN001
         """Insert ``books`` (and the ``aliases`` rows edge resolution needs).
 
         ``aliases`` is written here because :meth:`ingest_sql` bypasses
@@ -247,62 +248,71 @@ class GoodreadsUCSDSource(FileSource):
         how that drift happens. The store owns that column.
         """
         params: list[object] = [str(self.path)]
-        if self.authors_path is not None:
+        resolve_authors = self.authors_path is not None and "authors" in present
+        if resolve_authors:
             # Resolve author ids in SQL as well, so the fast path and the
-            # streaming path agree on the author tuple.
-            author_join = """
-                LEFT JOIN (
-                    SELECT
-                        CAST(author_id AS VARCHAR) AS author_id,
-                        CAST(name AS VARCHAR) AS name
-                    FROM read_json(?, format='newline_delimited')
-                ) AS names ON names.author_id = author_ids.author_id
+            # streaming path agree on the author tuple, order included.
+            authors_cte = """
+            author_ids AS (
+                SELECT
+                    kept.goodreads_id,
+                    position,
+                    NULLIF(TRIM(CAST(entry.author_id AS VARCHAR)), '') AS author_id
+                FROM kept, UNNEST(kept.authors) WITH ORDINALITY AS unnested(entry, position)
+            ),
+            author_names AS (
+                SELECT
+                    CAST(author_id AS VARCHAR) AS author_id,
+                    NULLIF(TRIM(CAST(name AS VARCHAR)), '') AS name
+                FROM read_json(?, format='newline_delimited')
+            ),
+            resolved_authors AS (
+                SELECT
+                    author_ids.goodreads_id,
+                    list(author_names.name ORDER BY author_ids.position) AS authors
+                FROM author_ids
+                JOIN author_names USING (author_id)
+                WHERE author_names.name IS NOT NULL
+                GROUP BY author_ids.goodreads_id
+            ),
             """
             params.append(str(self.authors_path))
         else:
-            author_join = "LEFT JOIN (SELECT NULL AS author_id, NULL AS name) AS names ON FALSE"
+            # Without the companion file there are only ids to show, so books
+            # are ingested authorless rather than displaying raw numbers.
+            authors_cte = """
+            resolved_authors AS (
+                SELECT NULL AS goodreads_id, []::VARCHAR[] AS authors WHERE FALSE
+            ),
+            """
 
         # ``TRY_CAST`` throughout: every numeric field in this dump is a string
         # and frequently blank, and a hard CAST would abort the whole ingest on
         # the first empty year.
+        series_col = sql_column(present, "series", fallback="[]::VARCHAR[]")
         sql = f"""
         WITH titled AS (
             SELECT
-                NULLIF(TRIM(CAST(book_id AS VARCHAR)), '') AS goodreads_id,
+                NULLIF(TRIM(CAST({sql_column(present, "book_id")} AS VARCHAR)), '') AS goodreads_id,
                 COALESCE(
-                    NULLIF(TRIM(CAST(title_without_series AS VARCHAR)), ''),
-                    NULLIF(TRIM(CAST(title AS VARCHAR)), '')
+                    NULLIF(TRIM(CAST({sql_column(present, "title_without_series")} AS VARCHAR)), ''),
+                    NULLIF(TRIM(CAST({sql_column(present, "title")} AS VARCHAR)), '')
                 ) AS title,
-                authors,
-                NULLIF(TRIM(CAST(isbn13 AS VARCHAR)), '') AS isbn13,
-                NULLIF(TRIM(CAST(asin AS VARCHAR)), '') AS asin,
-                TRY_CAST(NULLIF(TRIM(CAST(publication_year AS VARCHAR)), '') AS INTEGER) AS year,
-                TRY_CAST(NULLIF(TRIM(CAST(average_rating AS VARCHAR)), '') AS DOUBLE) AS avg_rating,
-                TRY_CAST(NULLIF(TRIM(CAST(ratings_count AS VARCHAR)), '') AS BIGINT) AS ratings_count,
-                CASE WHEN len(series) > 0
-                     THEN NULLIF(TRIM(CAST(series[1] AS VARCHAR)), '')
+                {sql_column(present, "authors", fallback="[]")} AS authors,
+                NULLIF(TRIM(CAST({sql_column(present, "isbn13")} AS VARCHAR)), '') AS isbn13,
+                NULLIF(TRIM(CAST({sql_column(present, "asin")} AS VARCHAR)), '') AS asin,
+                TRY_CAST(NULLIF(TRIM(CAST({sql_column(present, "publication_year")} AS VARCHAR)), '') AS INTEGER) AS year,
+                TRY_CAST(NULLIF(TRIM(CAST({sql_column(present, "average_rating")} AS VARCHAR)), '') AS DOUBLE) AS avg_rating,
+                TRY_CAST(NULLIF(TRIM(CAST({sql_column(present, "ratings_count")} AS VARCHAR)), '') AS BIGINT) AS ratings_count,
+                CASE WHEN len({series_col}) > 0
+                     THEN NULLIF(TRIM(CAST(({series_col})[1] AS VARCHAR)), '')
                 END AS series
             FROM read_json(?, format='newline_delimited')
         ),
         kept AS (
             SELECT * FROM titled WHERE goodreads_id IS NOT NULL AND title IS NOT NULL
         ),
-        author_ids AS (
-            SELECT
-                kept.goodreads_id,
-                position AS position,
-                NULLIF(TRIM(CAST(entry.author_id AS VARCHAR)), '') AS author_id
-            FROM kept, UNNEST(kept.authors) WITH ORDINALITY AS unnested(entry, position)
-        ),
-        resolved_authors AS (
-            SELECT
-                author_ids.goodreads_id,
-                list(names.name ORDER BY author_ids.position) AS authors
-            FROM author_ids
-            {author_join}
-            WHERE names.name IS NOT NULL AND names.name <> ''
-            GROUP BY author_ids.goodreads_id
-        ),
+        {authors_cte}
         final AS (
             SELECT
                 '{WORK_ID_PREFIX}' || kept.goodreads_id AS work_id,
@@ -354,20 +364,22 @@ class GoodreadsUCSDSource(FileSource):
         conn.execute(aliases_sql, params)
         return books_added
 
-    def _ingest_edges_sql(self, conn, *, max_rank: int) -> int:  # noqa: ANN001
+    def _ingest_edges_sql(self, conn, present: Mapping[str, str], *, max_rank: int) -> int:  # noqa: ANN001
+        if "similar_books" not in present:
+            return 0
         # Derived from unresolved_ref() rather than hardcoded, so the SQL and
         # streaming paths cannot drift apart on the ref format.
         ref_prefix = unresolved_ref(self.name, "\x00").removesuffix("\x00")
         edges_sql = f"""
         WITH kept AS (
             SELECT
-                NULLIF(TRIM(CAST(book_id AS VARCHAR)), '') AS goodreads_id,
+                NULLIF(TRIM(CAST({sql_column(present, "book_id")} AS VARCHAR)), '') AS goodreads_id,
                 similar_books
             FROM read_json(?, format='newline_delimited')
-            WHERE NULLIF(TRIM(CAST(book_id AS VARCHAR)), '') IS NOT NULL
+            WHERE NULLIF(TRIM(CAST({sql_column(present, "book_id")} AS VARCHAR)), '') IS NOT NULL
               AND COALESCE(
-                    NULLIF(TRIM(CAST(title_without_series AS VARCHAR)), ''),
-                    NULLIF(TRIM(CAST(title AS VARCHAR)), '')
+                    NULLIF(TRIM(CAST({sql_column(present, "title_without_series")} AS VARCHAR)), ''),
+                    NULLIF(TRIM(CAST({sql_column(present, "title")} AS VARCHAR)), '')
                   ) IS NOT NULL
         ),
         exploded AS (
@@ -393,6 +405,26 @@ class GoodreadsUCSDSource(FileSource):
         ON CONFLICT (src, dst, kind, source) DO UPDATE SET rank = excluded.rank
         """
         return _count_of(conn.execute(edges_sql, [str(self.path), max_rank]))
+
+
+def json_columns(conn, path: Path) -> dict[str, str]:  # noqa: ANN001
+    """The ``column -> inferred type`` schema DuckDB reads a JSON dump as.
+
+    A key absent from *every* record is not a column, and referencing it is a
+    bind error rather than a NULL -- so the bulk queries are assembled against
+    the schema that is actually there. This is what lets one query serve both a
+    2018 and a 2023 export of the same dataset, whose keys differ.
+    """
+    described = conn.execute(
+        "DESCRIBE SELECT * FROM read_json(?, format='newline_delimited')",
+        [str(path)],
+    ).fetchall()
+    return {row[0]: row[1] for row in described}
+
+
+def sql_column(present: Mapping[str, str], name: str, *, fallback: str = "NULL") -> str:
+    """Reference ``name`` if the dump has it, else the fallback literal."""
+    return name if name in present else fallback
 
 
 def _record_title(record: dict[str, Any]) -> str | None:
