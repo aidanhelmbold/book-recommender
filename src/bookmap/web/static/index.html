@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bookmap</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="/static/map.css">
+</head>
+<body>
+<div class="viz-root">
+  <header class="bar">
+    <h1>bookmap</h1>
+    <form id="seed-form" autocomplete="off">
+      <label class="field">
+        <span class="label">Books you like</span>
+        <input id="seeds" type="text" placeholder="Dune, Foundation, Hyperion"
+               aria-describedby="seeds-help">
+      </label>
+      <button type="submit" id="go">Map it</button>
+    </form>
+    <div class="controls">
+      <label class="knob">
+        <span>Popularity damping <output id="beta-out">0.25</output></span>
+        <input id="beta" type="range" min="0" max="1" step="0.05" value="0.25">
+      </label>
+      <label class="knob">
+        <span>Diversity <output id="lambda-out">0.70</output></span>
+        <input id="mmr" type="range" min="0" max="1" step="0.05" value="0.7">
+      </label>
+      <label class="check">
+        <input id="same-author" type="checkbox">
+        <span>Exclude same author</span>
+      </label>
+      <button type="button" id="theme" aria-label="Toggle light and dark theme">Theme</button>
+    </div>
+  </header>
+
+  <p id="seeds-help" class="help">
+    Comma-separated titles. Recommendations are scored against the whole set at
+    once, not each book separately.
+  </p>
+
+  <div id="status" class="status" role="status"></div>
+
+  <main class="split">
+    <section class="map-pane">
+      <figure>
+        <figcaption class="figure-head">
+          <span class="figure-title">Neighbourhood map</span>
+          <span class="figure-sub">Position shows graph proximity: books that sit together are densely connected.</span>
+        </figcaption>
+        <!-- Legend is markup, not canvas: it must be selectable and readable by
+             a screen reader, and identity must never rest on colour alone. -->
+        <ul class="legend" id="legend">
+          <li data-role="seed"><span class="swatch swatch-seed"></span>Your books</li>
+          <li data-role="recommendation"><span class="swatch swatch-rec"></span>Recommended</li>
+          <li data-role="context"><span class="swatch swatch-ctx"></span>Nearby context</li>
+        </ul>
+        <div id="clusters" class="clusters"></div>
+        <div class="canvas-wrap">
+          <canvas id="map" role="img"
+                  aria-label="Force-directed map of related books"></canvas>
+          <div id="tip" class="tip" hidden></div>
+        </div>
+        <p class="hint">Scroll to zoom, drag to pan, click a book to expand its neighbours.</p>
+      </figure>
+    </section>
+
+    <aside class="list-pane">
+      <h2>Recommendations</h2>
+      <!-- The table view is the non-visual equivalent of the map, and it is what
+           satisfies the relief rule for the lower-contrast context colour. -->
+      <ol id="results" class="results"></ol>
+      <div id="empty" class="empty">Enter a few books above to build a map.</div>
+    </aside>
+  </main>
+</div>
+<script type="module" src="/static/map.js"></script>
+</body>
+</html>

@@ -1,0 +1,246 @@
+/* Roles, not raw hex, throughout the sheet: the light/dark values swap in one
+   place below and nothing else has to know which mode is active.
+
+   The three series slots are the first three of the validated categorical order
+   (blue, orange, aqua). Three is not an arbitrary cap — a node-link map is an
+   all-pairs form, since any two roles can end up adjacent on screen, and only
+   the first three slots clear the colour-vision and normal-vision separation
+   floors in *both* modes. A fourth would put violet next to blue, which is ΔE
+   1.9 under protanopia: indistinguishable. Community identity is therefore
+   carried by position and by direct labels, never by hue. */
+
+.viz-root {
+  color-scheme: light;
+  --surface-1: #fcfcfb;
+  --surface-2: #f2f2f0;
+  --border: #dcdcd8;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #77766f;
+  --series-seed: #eb6834;   /* slot 2, orange — what the user named */
+  --series-rec: #2a78d6;    /* slot 1, blue  — what the graph proposed */
+  --series-ctx: #1baf7a;    /* slot 3, aqua  — context only */
+  --edge: #0b0b0b;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) .viz-root {
+    color-scheme: dark;
+    --surface-1: #1a1a19;
+    --surface-2: #232322;
+    --border: #3a3a37;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #9a9a90;
+    --series-seed: #d95926;
+    --series-rec: #3987e5;
+    --series-ctx: #199e70;
+    --edge: #ffffff;
+  }
+}
+
+:root[data-theme="dark"] .viz-root {
+  color-scheme: dark;
+  --surface-1: #1a1a19;
+  --surface-2: #232322;
+  --border: #3a3a37;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --text-muted: #9a9a90;
+  --series-seed: #d95926;
+  --series-rec: #3987e5;
+  --series-ctx: #199e70;
+  --edge: #ffffff;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font: 15px/1.5 ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.viz-root {
+  min-height: 100vh;
+  padding: 20px clamp(16px, 3vw, 32px) 32px;
+  background: var(--surface-1);
+  color: var(--text-primary);
+}
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  align-items: flex-end;
+}
+
+h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+#seed-form { display: flex; gap: 10px; align-items: flex-end; flex: 1 1 420px; }
+.field { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+.label, .knob span, .check span { font-size: 12px; color: var(--text-secondary); }
+
+input[type="text"] {
+  width: 100%;
+  padding: 9px 11px;
+  font: inherit;
+  color: var(--text-primary);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+}
+
+input[type="text"]:focus-visible,
+button:focus-visible,
+input[type="range"]:focus-visible {
+  outline: 2px solid var(--series-rec);
+  outline-offset: 2px;
+}
+
+button {
+  padding: 9px 15px;
+  font: inherit;
+  font-weight: 500;
+  color: var(--surface-1);
+  background: var(--text-primary);
+  border: 0;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+button#theme {
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border);
+}
+
+/* Filters sit in one row above the chart, never beside or below it. */
+.controls { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; }
+.knob { display: flex; flex-direction: column; gap: 3px; min-width: 150px; }
+.check { display: flex; gap: 7px; align-items: center; cursor: pointer; }
+output { font-variant-numeric: tabular-nums; color: var(--text-primary); }
+
+.help, .hint {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  max-width: 68ch;
+}
+
+.status { margin: 12px 0 0; font-size: 13px; color: var(--text-secondary); min-height: 1.5em; }
+.status[data-kind="error"] { color: var(--series-seed); font-weight: 500; }
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(280px, 1fr);
+  gap: 22px;
+  margin-top: 14px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .split { grid-template-columns: minmax(0, 1fr); }
+}
+
+figure { margin: 0; }
+.figure-head { display: flex; flex-direction: column; gap: 2px; margin-bottom: 10px; }
+.figure-title { font-size: 15px; font-weight: 600; }
+.figure-sub { font-size: 12px; color: var(--text-muted); }
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 0 0 10px;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.legend li { display: flex; gap: 6px; align-items: center; }
+/* `display: flex` above outranks the `hidden` attribute's default `display: none`,
+   so hiding an absent role needs saying explicitly. */
+.legend li[hidden] { display: none; }
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  /* 2px surface ring: nodes overlap on a dense map, and the ring is what keeps
+     two touching circles legible as two circles. */
+  box-shadow: 0 0 0 2px var(--surface-1);
+}
+
+.swatch-seed { background: var(--series-seed); }
+.swatch-rec { background: var(--series-rec); }
+.swatch-ctx { background: var(--series-ctx); }
+
+.canvas-wrap {
+  position: relative;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+canvas { display: block; width: 100%; height: min(66vh, 640px); cursor: grab; }
+canvas.dragging { cursor: grabbing; }
+
+.tip {
+  position: absolute;
+  z-index: 2;
+  max-width: 260px;
+  padding: 8px 10px;
+  pointer-events: none;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-primary);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.16);
+}
+
+.tip strong { display: block; font-size: 13px; }
+.tip .meta { color: var(--text-secondary); }
+
+.results { margin: 0; padding: 0 0 0 1.6em; display: flex; flex-direction: column; gap: 11px; }
+.results li { cursor: pointer; }
+.results li:hover .r-title { text-decoration: underline; }
+.r-title { font-weight: 500; }
+.r-meta { font-size: 12px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.r-why { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.results li.active .r-title { color: var(--series-rec); }
+
+.empty { font-size: 13px; color: var(--text-muted); }
+
+.unresolved {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+}
+
+/* Cluster names live in the DOM, not on the canvas: a centroid label in a dense
+   subgraph lands inside a neighbouring community as often as its own. */
+.clusters { margin: 0 0 12px; }
+.clusters ul { flex-direction: row; flex-wrap: wrap; gap: 4px 18px; }
+.clusters h3 { margin: 0 0 8px; font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
+.clusters ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.clusters li { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; color: var(--text-secondary); }
+.c-count { color: var(--text-muted); font-variant-numeric: tabular-nums; }
