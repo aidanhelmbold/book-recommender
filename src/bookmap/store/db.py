@@ -10,6 +10,7 @@ does not matter at typeahead latencies.
 from __future__ import annotations
 
 from collections.abc import Iterable, Iterator, Sequence
+from contextlib import contextmanager
 from itertools import islice
 from pathlib import Path
 from typing import TYPE_CHECKING, Self
@@ -99,6 +100,39 @@ _ALIAS_FIELDS = ("isbn13", "asin", "goodreads_id", "openlibrary_id")
 
 _STAGING_VIEW = "_bookmap_batch"
 
+_REF_MAP_TABLE = "_bookmap_ref_map"
+"""Temp table holding one row per *distinct* namespaced endpoint in ``edges_raw``.
+
+The point of it is that the prefix-stripping happens here, once per distinct
+ref, instead of once per edge: 2.4M distinct refs rather than 40M rows, and the
+alias/book joins get a real column to hash on instead of a ``substr`` computed
+per probe.
+"""
+
+_EDGES_SWAP_TABLE = "_bookmap_edges_resolved"
+
+_EDGES_RAW_INDEXES = (
+    ("edges_raw_pk_idx", "edges_raw (src, dst, kind, source)", True),
+    ("edges_raw_src_idx", "edges_raw (src)", False),
+    ("edges_raw_dst_idx", "edges_raw (dst)", False),
+)
+"""Indexes to rebuild after :meth:`Store.resolve_refs` swaps ``edges_raw``.
+
+The unique one stands in for the PRIMARY KEY declared in ``schema.sql``:
+``CREATE TABLE AS SELECT`` carries no constraints across and DuckDB has no
+``ALTER TABLE ADD PRIMARY KEY``, but a unique index is the same ART structure
+and ``ON CONFLICT`` resolves against it identically. It is also an order of
+magnitude cheaper -- built in bulk from sorted data rather than by 40M
+individual constraint checks during an INSERT.
+"""
+
+_SELF_LOOP_AND_UNRESOLVED_DELETE = f"""
+DELETE FROM edges_raw
+WHERE src = dst
+   OR src IN (SELECT ref FROM {_REF_MAP_TABLE} WHERE work_id IS NULL)
+   OR dst IN (SELECT ref FROM {_REF_MAP_TABLE} WHERE work_id IS NULL)
+"""
+
 
 class Store:
     """Owns the DuckDB connection and all SQL.
@@ -107,21 +141,47 @@ class Store:
     ingest (DuckDB permits a single writer).
     """
 
-    def __init__(self, path: str | Path, *, read_only: bool = False) -> None:
+    def __init__(
+        self,
+        path: str | Path,
+        *,
+        read_only: bool = False,
+        memory_limit: str | None = None,
+        temp_directory: str | Path | None = None,
+        max_temp_directory_size: str | None = None,
+    ) -> None:
         import duckdb
 
         self.path = Path(path)
         self.read_only = read_only
+        # Spill controls are surfaced because the alternative is what a 9GB dump
+        # actually did to a user: DuckDB's default temp directory is beside the
+        # database file and its default size cap is 90% of the *disk*, so a query
+        # that spills fills the volume and takes the machine with it. Naming a
+        # directory and a ceiling turns that into a query that fails, quickly,
+        # saying which limit it hit.
+        config: dict[str, str] = {}
+        if memory_limit is not None:
+            config["memory_limit"] = memory_limit
+        if temp_directory is not None:
+            config["temp_directory"] = str(temp_directory)
+        if max_temp_directory_size is not None:
+            config["max_temp_directory_size"] = max_temp_directory_size
         self._conn: duckdb.DuckDBPyConnection | None = duckdb.connect(
-            str(self.path), read_only=read_only
+            str(self.path), read_only=read_only, config=config
         )
 
     # -- lifecycle ---------------------------------------------------------
 
     @classmethod
-    def open(cls, path: str | Path, *, read_only: bool = False) -> Self:
-        """Open (creating if needed) and apply the schema."""
-        store = cls(path, read_only=read_only)
+    def open(cls, path: str | Path, *, read_only: bool = False, **config: object) -> Self:
+        """Open (creating if needed) and apply the schema.
+
+        Extra keyword arguments are forwarded to :meth:`__init__`, which is how
+        ``memory_limit`` / ``temp_directory`` / ``max_temp_directory_size`` reach
+        DuckDB.
+        """
+        store = cls(path, read_only=read_only, **config)  # type: ignore[arg-type]
         if not read_only:
             # DDL is refused on a read-only database, and a reader has by
             # definition nothing to migrate: whoever wrote the file applied it.
@@ -142,6 +202,25 @@ class Store:
     def apply_schema(self) -> None:
         """Execute ``schema.sql``. Idempotent."""
         self.conn.execute(SCHEMA_PATH.read_text(encoding="utf-8"))
+
+    @contextmanager
+    def bulk_load(self) -> Iterator[None]:
+        """Scope ``preserve_insertion_order=false`` to a bulk load.
+
+        Row order is meaningless in every table here -- each one is keyed and read
+        back through an ORDER BY or an aggregate -- and holding it costs DuckDB a
+        full-result buffer on the way in, which is precisely the memory that
+        turns a multi-gigabyte ingest into a spill. Scoped rather than set on the
+        connection because the query side does rely on ordering (``search_titles``
+        and the projection both order explicitly, but a future reader might not).
+        """
+        conn = self.conn
+        previous = conn.execute("SELECT current_setting('preserve_insertion_order')").fetchone()[0]
+        conn.execute("SET preserve_insertion_order=false")
+        try:
+            yield
+        finally:
+            conn.execute(f"SET preserve_insertion_order={'true' if previous else 'false'}")
 
     @property
     def conn(self) -> duckdb.DuckDBPyConnection:
@@ -286,12 +365,67 @@ class Store:
         routinely references a book before describing it. This runs after the
         book table is populated and rewrites both endpoints via ``aliases``,
         dropping edges whose endpoints never resolved. Returns edges dropped.
+
+        Two properties are load-bearing and both come from the same rule -- an
+        endpoint carrying no *known* ref prefix stands for itself:
+
+        * a second call is a no-op, because the first left nothing namespaced;
+        * ids that were never refs (the demo corpus, a hand-built graph) survive.
+
+        Shape of the work, which is the whole reason this method is written the
+        way it is: ``edges_raw`` is 40M rows on the real Goodreads dump but its
+        *distinct* endpoints number a few million. So the prefix stripping and
+        the alias lookups happen once per distinct ref in a small mapping table,
+        and the 40M-row pass is reduced to two equi-joins on a plain column.
         """
         conn = self.conn
         before = int(conn.execute("SELECT count(*) FROM edges_raw").fetchone()[0])
         if not before:
             return 0
 
+        with self.bulk_load():
+            self._build_ref_map()
+            try:
+                # Rows needing a *rewrite*, as opposed to rows merely needing to be
+                # dropped. Checked because the two cost wildly different amounts:
+                # dropping is a DELETE over a fraction of the table, while
+                # rewriting a primary-key column means rebuilding the table. After
+                # a bulk ingest that already resolved what it could, this is zero
+                # and the expensive branch is skipped entirely.
+                rewritable = int(
+                    conn.execute(
+                        f"""
+                        SELECT count(*) FROM edges_raw e
+                        WHERE e.src IN (SELECT ref FROM {_REF_MAP_TABLE} WHERE work_id IS NOT NULL)
+                           OR e.dst IN (SELECT ref FROM {_REF_MAP_TABLE} WHERE work_id IS NOT NULL)
+                        """  # noqa: S608 - table name is a module constant
+                    ).fetchone()[0]
+                )
+                if rewritable:
+                    self._swap_in_resolved_edges()
+                else:
+                    conn.execute(_SELF_LOOP_AND_UNRESOLVED_DELETE)
+            finally:
+                conn.execute(f"DROP TABLE IF EXISTS {_REF_MAP_TABLE}")
+
+        kept = int(conn.execute("SELECT count(*) FROM edges_raw").fetchone()[0])
+        return before - kept
+
+    def _build_ref_map(self) -> None:
+        """Populate :data:`_REF_MAP_TABLE`: ``ref -> work_id``, ``NULL`` if unknown.
+
+        Only endpoints carrying a *known* prefix appear at all. Absence therefore
+        means "not a ref, leave it alone" and a present-but-NULL ``work_id`` means
+        "a ref nothing describes, drop the edge" -- the two cases the old
+        six-way join distinguished with a ``CASE`` over a join it had to compute
+        per edge.
+
+        The ``books`` join is the fallback for a source whose raw ids are already
+        canonical work ids (the bundled demo corpus: its ids *are* the work ids).
+        It is affordable here in a way it was not before, because it now probes
+        once per distinct ref rather than once per edge endpoint.
+        """
+        conn = self.conn
         # A VALUES join supplies the ref-prefix -> alias id_type mapping, so the
         # store and the adapters share one definition of it.
         prefixes = ", ".join(["(?, ?)"] * len(REF_ID_TYPE))
@@ -299,74 +433,90 @@ class Store:
         for source, id_type in REF_ID_TYPE.items():
             params.extend([str(source), id_type])
 
-        # An endpoint resolves to itself when it carries no known ref prefix --
-        # which is what makes a second pass a no-op -- and to NULL when it is a
-        # ref whose alias is absent, which is what marks it for dropping.
-        #
-        # The join onto ``books`` is the fallback for a source whose raw ids are
-        # already canonical work ids (the bundled demo corpus: its ids *are* the
-        # work ids, so there is nothing for ``upsert_books`` to alias). Without
-        # it every demo edge would resolve to NULL and be dropped, leaving a
-        # corpus of 177 books and no graph.
         conn.execute(
             f"""
-            CREATE OR REPLACE TEMP TABLE _bookmap_resolved AS
-            WITH ref_types(prefix, id_type) AS (VALUES {prefixes})
+            CREATE OR REPLACE TEMP TABLE {_REF_MAP_TABLE} AS
+            WITH ref_types(prefix, id_type) AS (VALUES {prefixes}),
+            endpoints AS (
+                SELECT DISTINCT endpoint FROM (
+                    SELECT src AS endpoint FROM edges_raw
+                    UNION ALL
+                    SELECT dst AS endpoint FROM edges_raw
+                )
+                WHERE strpos(endpoint, ':') > 0
+            ),
+            parsed AS (
+                SELECT
+                    endpoint,
+                    split_part(endpoint, ':', 1) AS prefix,
+                    substr(endpoint, strpos(endpoint, ':') + 1) AS raw_id
+                FROM endpoints
+            )
             SELECT
-                COALESCE(
-                    sa.work_id, sbook.work_id,
-                    CASE WHEN st.prefix IS NULL THEN e.src END
-                ) AS src,
-                COALESCE(
-                    da.work_id, dbook.work_id,
-                    CASE WHEN dt.prefix IS NULL THEN e.dst END
-                ) AS dst,
-                e.kind AS kind,
-                e."rank" AS "rank",
-                e.source AS source
-            FROM edges_raw e
-            LEFT JOIN ref_types st
-                   ON strpos(e.src, ':') > 0 AND st.prefix = split_part(e.src, ':', 1)
-            LEFT JOIN aliases sa
-                   ON sa.id_type = st.id_type
-                  AND sa.id_value = substr(e.src, strpos(e.src, ':') + 1)
-            LEFT JOIN books sbook
-                   ON st.prefix IS NOT NULL
-                  AND sbook.work_id = substr(e.src, strpos(e.src, ':') + 1)
-            LEFT JOIN ref_types dt
-                   ON strpos(e.dst, ':') > 0 AND dt.prefix = split_part(e.dst, ':', 1)
-            LEFT JOIN aliases da
-                   ON da.id_type = dt.id_type
-                  AND da.id_value = substr(e.dst, strpos(e.dst, ':') + 1)
-            LEFT JOIN books dbook
-                   ON dt.prefix IS NOT NULL
-                  AND dbook.work_id = substr(e.dst, strpos(e.dst, ':') + 1)
-            """,  # noqa: S608 - the only interpolation is a placeholder list
+                parsed.endpoint AS ref,
+                COALESCE(alias.work_id, book.work_id) AS work_id
+            FROM parsed
+            -- An inner join: an endpoint whose prefix is not a known source is
+            -- not a ref, and must be left exactly as it is.
+            JOIN ref_types ON ref_types.prefix = parsed.prefix
+            LEFT JOIN aliases AS alias
+                   ON alias.id_type = ref_types.id_type
+                  AND alias.id_value = parsed.raw_id
+            LEFT JOIN books AS book ON book.work_id = parsed.raw_id
+            """,  # noqa: S608 - the only interpolations are a placeholder list and module constants
             params,
         )
-        try:
-            kept = int(
-                conn.execute(
-                    "SELECT count(*) FROM _bookmap_resolved "
-                    "WHERE src IS NOT NULL AND dst IS NOT NULL AND src <> dst"
-                ).fetchone()[0]
+
+    def _swap_in_resolved_edges(self) -> None:
+        """Rebuild ``edges_raw`` with resolved endpoints and rename it into place.
+
+        A rebuild rather than an ``UPDATE`` because every endpoint is part of the
+        primary key: an in-place update would delete and re-insert each row's
+        index entry, twice the index churn of building a fresh one, and it could
+        not express the collisions below at all.
+
+        A rename swap rather than ``DELETE`` + ``INSERT ... SELECT`` from a
+        staging table because that writes the whole table twice -- once into
+        staging and once back -- which on a 40M-row dump is what exhausted a
+        user's disk.
+        """
+        conn = self.conn
+        conn.execute(f"DROP TABLE IF EXISTS {_EDGES_SWAP_TABLE}")
+        # A plain CTAS: no constraints, so the rows stream out to disk without
+        # 40M individual index probes. The indexes go on afterwards, in bulk.
+        # Two refs can resolve onto one work (two editions of it), which both
+        # collapses a pair into a self-loop and collides on the key; the
+        # strongest surviving rank wins.
+        conn.execute(
+            f"""
+            CREATE TABLE {_EDGES_SWAP_TABLE} AS
+            SELECT src, dst, kind, min("rank") AS "rank", source
+            FROM (
+                SELECT
+                    CASE WHEN src_ref.ref IS NULL THEN e.src ELSE src_ref.work_id END AS src,
+                    CASE WHEN dst_ref.ref IS NULL THEN e.dst ELSE dst_ref.work_id END AS dst,
+                    e.kind AS kind,
+                    e."rank" AS "rank",
+                    e.source AS source
+                FROM edges_raw e
+                LEFT JOIN {_REF_MAP_TABLE} AS src_ref ON src_ref.ref = e.src
+                LEFT JOIN {_REF_MAP_TABLE} AS dst_ref ON dst_ref.ref = e.dst
             )
-            conn.execute("DELETE FROM edges_raw")
-            # Two refs can resolve onto one work (two editions of it), which both
-            # collapses a pair into a self-loop and collides on the primary key;
-            # the strongest surviving rank wins.
+            WHERE src IS NOT NULL AND dst IS NOT NULL AND src <> dst
+            GROUP BY src, dst, kind, source
+            -- Not cosmetic: writing the rows in key order lets the index builds
+            -- below descend a stable ART prefix instead of jumping around the
+            -- tree. Measured on 20M synthetic ref edges it takes the three index
+            -- builds from 98s to 46s, for 1.5s of sorting.
+            ORDER BY src, dst, kind, source
+            """  # noqa: S608 - table names are module constants
+        )
+        conn.execute("DROP TABLE edges_raw")
+        conn.execute(f"ALTER TABLE {_EDGES_SWAP_TABLE} RENAME TO edges_raw")
+        for name, target, unique in _EDGES_RAW_INDEXES:
             conn.execute(
-                """
-                INSERT INTO edges_raw (src, dst, kind, "rank", source)
-                SELECT src, dst, kind, min("rank"), source
-                FROM _bookmap_resolved
-                WHERE src IS NOT NULL AND dst IS NOT NULL AND src <> dst
-                GROUP BY src, dst, kind, source
-                """
+                f"CREATE {'UNIQUE ' if unique else ''}INDEX IF NOT EXISTS {name} ON {target}"
             )
-        finally:
-            conn.execute("DROP TABLE IF EXISTS _bookmap_resolved")
-        return before - kept
 
     def write_node_metrics(
         self,

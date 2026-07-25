@@ -67,10 +67,37 @@ def _fail(message: str) -> None:
     raise typer.Exit(1)
 
 
-def _open_writable(db: str) -> Store:
+# Shared option objects so every write-side command documents these identically.
+TEMP_DIR_OPT = typer.Option(
+    None, "--temp-dir", help="Where DuckDB may spill to disk during large queries."
+)
+MEMORY_LIMIT_OPT = typer.Option(
+    None, "--memory-limit", help="DuckDB memory ceiling, e.g. 8GB. Work beyond it spills."
+)
+MAX_TEMP_OPT = typer.Option(
+    None, "--max-temp-size", help="Cap on spill on disk, e.g. 20GB. Prevents filling the volume."
+)
+
+
+def _resources(
+    temp_dir: str | None, memory_limit: str | None, max_temp_size: str | None
+) -> dict[str, object]:
+    """Collect the spill controls actually supplied, for Store.open."""
+    config: dict[str, object] = {}
+    if temp_dir is not None:
+        Path(temp_dir).mkdir(parents=True, exist_ok=True)
+        config["temp_directory"] = temp_dir
+    if memory_limit is not None:
+        config["memory_limit"] = memory_limit
+    if max_temp_size is not None:
+        config["max_temp_directory_size"] = max_temp_size
+    return config
+
+
+def _open_writable(db: str, **resources: object) -> Store:
     """Open (creating if absent) a store for writing."""
     try:
-        return Store.open(db)
+        return Store.open(db, **resources)
     except Exception as exc:  # noqa: BLE001 - duckdb raises a family of IO errors
         _fail(f"cannot open database {db}: {exc}")
         raise  # unreachable; keeps the return type honest
@@ -284,12 +311,18 @@ def _finish_ingest(store: Store, *, label: str) -> None:
 
 
 @ingest_app.command("demo")
-def ingest_demo(db: str = DEFAULT_DB_PATH, path: str | None = None) -> None:
+def ingest_demo(
+    db: str = DEFAULT_DB_PATH,
+    path: str | None = None,
+    temp_dir: str | None = TEMP_DIR_OPT,
+    memory_limit: str | None = MEMORY_LIMIT_OPT,
+    max_temp_size: str | None = MAX_TEMP_OPT,
+) -> None:
     """Load the bundled hand-authored demo corpus."""
     from bookmap.sources.demo import DemoSource
 
     source = _source_or_fail(DemoSource, path) if path else DemoSource()
-    with _open_writable(db) as store:
+    with _open_writable(db, **_resources(temp_dir, memory_limit, max_temp_size)) as store:
         store.upsert_books(source.iter_books())
         store.insert_raw_edges(source.iter_edges())
         store.mark_ingest("demo", str(source.path), completed=True)
@@ -301,6 +334,9 @@ def ingest_goodreads(
     path: str,
     db: str = DEFAULT_DB_PATH,
     max_rank: int = 50,
+    temp_dir: str | None = TEMP_DIR_OPT,
+    memory_limit: str | None = MEMORY_LIMIT_OPT,
+    max_temp_size: str | None = MAX_TEMP_OPT,
     authors: str | None = typer.Option(
         None,
         "--authors",
@@ -323,7 +359,7 @@ def ingest_goodreads(
             "ingested without author names"
         )
 
-    with _open_writable(db) as store:
+    with _open_writable(db, **_resources(temp_dir, memory_limit, max_temp_size)) as store:
         # Bulk SQL, not the streaming reader: the real dump is 9GB of NDJSON and
         # DuckDB's read_json scans it without it ever entering Python. That is
         # two statements, so a spinner is the only honest progress signal here.
@@ -334,23 +370,37 @@ def ingest_goodreads(
 
 
 @ingest_app.command("amazon-meta")
-def ingest_amazon_meta(path: str, db: str = DEFAULT_DB_PATH, max_rank: int = 50) -> None:
+def ingest_amazon_meta(
+    path: str,
+    db: str = DEFAULT_DB_PATH,
+    max_rank: int = 50,
+    temp_dir: str | None = TEMP_DIR_OPT,
+    memory_limit: str | None = MEMORY_LIMIT_OPT,
+    max_temp_size: str | None = MAX_TEMP_OPT,
+) -> None:
     """Load SNAP amazon-meta.txt co-purchase data."""
     from bookmap.sources.amazon_meta import AmazonMetaSource
 
     source = _source_or_fail(AmazonMetaSource, path)
-    with _open_writable(db) as store:
+    with _open_writable(db, **_resources(temp_dir, memory_limit, max_temp_size)) as store:
         _stream_into(store, source, label="amazon-meta", max_rank=max_rank)
         _finish_ingest(store, label="amazon-meta")
 
 
 @ingest_app.command("amazon-reviews")
-def ingest_amazon_reviews(path: str, db: str = DEFAULT_DB_PATH, max_rank: int = 50) -> None:
+def ingest_amazon_reviews(
+    path: str,
+    db: str = DEFAULT_DB_PATH,
+    max_rank: int = 50,
+    temp_dir: str | None = TEMP_DIR_OPT,
+    memory_limit: str | None = MEMORY_LIMIT_OPT,
+    max_temp_size: str | None = MAX_TEMP_OPT,
+) -> None:
     """Load Amazon Reviews 2023 book metadata (also_buy / also_view)."""
     from bookmap.sources.amazon_meta import AmazonReviews2023Source
 
     source = _source_or_fail(AmazonReviews2023Source, path)
-    with _open_writable(db) as store:
+    with _open_writable(db, **_resources(temp_dir, memory_limit, max_temp_size)) as store:
         with console.status(f"reading {Path(path).name}…"):
             books_added, edges_added = source.ingest_sql(store, max_rank=max_rank)
         console.print(f"read {books_added:,} books and {edges_added:,} edges")
@@ -365,7 +415,7 @@ def ingest_openlibrary(db: str = DEFAULT_DB_PATH, limit: int | None = None) -> N
     from bookmap.sources.openlibrary import OpenLibrarySource
 
     source = OpenLibrarySource()
-    with _open_writable(db) as store:
+    with _open_writable(db, **_resources(temp_dir, memory_limit, max_temp_size)) as store:
         with console.status("querying Open Library…"):
             enriched = asyncio.run(source.enrich_store(store, limit=limit))
         console.print(f"[green]openlibrary[/green]: enriched {enriched:,} books")
@@ -402,6 +452,9 @@ def build(
     max_rank: int = 50,
     communities: bool = True,
     betweenness: bool = False,
+    temp_dir: str | None = TEMP_DIR_OPT,
+    memory_limit: str | None = MEMORY_LIMIT_OPT,
+    max_temp_size: str | None = MAX_TEMP_OPT,
 ) -> None:
     """Fuse raw edges into the weighted graph and compute node metrics."""
     from bookmap.graph.build import fuse_in_sql, prune
@@ -410,7 +463,7 @@ def build(
     from bookmap.store.projection import project
 
     config = GraphConfig(min_weight=min_weight, drop_leaves=drop_leaves, max_rank=max_rank)
-    with _open_writable(db) as store:
+    with _open_writable(db, **_resources(temp_dir, memory_limit, max_temp_size)) as store:
         with console.status("fusing edges…"):
             # fuse_in_sql replaces edges_fused wholesale, which is what makes a
             # rebuild idempotent rather than cumulative -- edge weights are sums,
