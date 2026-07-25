@@ -9,13 +9,18 @@ and nothing in the unit tests would catch it.
 
 from __future__ import annotations
 
+from collections import Counter
 from pathlib import Path
 
 import pytest
 
 from bookmap.config import RecommendConfig
 from bookmap.graph.build import fuse_edges
-from bookmap.graph.communities import detect_communities
+from bookmap.graph.communities import (
+    community_sizes,
+    detect_communities,
+    label_communities,
+)
 from bookmap.recommend import recommend
 from bookmap.sources.demo import DemoSource
 from bookmap.store.db import Store
@@ -24,7 +29,14 @@ from bookmap.store.projection import project
 
 @pytest.fixture(scope="module")
 def built(tmp_path_factory) -> Path:
-    """Ingest and build the demo corpus once for the whole module."""
+    """Ingest and build the demo corpus once for the whole module.
+
+    This must mirror everything ``bookmap build`` does, community detection
+    included: several tests below read communities back through
+    ``store.node_community``, and a fixture that only fuses edges leaves that
+    column NULL, so those assertions would compare None against None and pass
+    for the wrong reason.
+    """
     db = tmp_path_factory.mktemp("integration") / "demo.duckdb"
     source = DemoSource()
     with Store.open(db) as store:
@@ -32,6 +44,29 @@ def built(tmp_path_factory) -> Path:
         store.insert_raw_edges(source.iter_edges())
         store.resolve_refs()
         store.replace_fused_edges(fuse_edges(store.iter_raw_edges()))
+
+        projection = project(store)
+        labels = detect_communities(projection)
+        degree = projection.degree()
+        weighted = projection.weighted_degree()
+        store.write_node_metrics(
+            [
+                (work_id, int(degree[row]), float(weighted[row]), int(labels[row]), None)
+                for row, work_id in enumerate(projection.work_ids)
+            ]
+        )
+        books = store.get_books(projection.work_ids)
+        titles = [
+            books[work_id].title if work_id in books else work_id
+            for work_id in projection.work_ids
+        ]
+        sizes = community_sizes(labels)
+        store.write_communities(
+            [
+                (community, label, sizes[community])
+                for community, label in label_communities(labels, titles).items()
+            ]
+        )
     return db
 
 
@@ -111,17 +146,31 @@ class TestRecommendationQuality:
                 for a, b in zip(explanation.path, explanation.path[1:], strict=False):
                     assert graph.has_edge(a, b), f"phantom edge {a} -> {b}"
 
-    def test_results_span_more_than_one_community(self, store, projection) -> None:
-        """Diversity reranking should reach across clusters when the seeds do.
+    def test_results_do_not_collapse_into_one_community(self, store, projection) -> None:
+        """Mixed seeds must produce a mixed list, not just the densest region.
 
-        Without MMR the whole list collapses into the densest region the seeds
-        touch, which is technically relevant and practically useless.
+        Seeding hard SF and Regency romance should surface both. The failure this
+        guards is collapse: every result landing in one cluster, which is
+        technically relevant and practically useless.
+
+        The bar is deliberately "spans both seeded clusters, neither crowding the
+        other out" rather than a fixed count of clusters. An earlier version
+        demanded three or more, which is stricter than correct -- it can only be
+        met by wandering *outside* both seeded genres, and it was in fact only
+        satisfiable while a scale bug in the MMR redundancy term was forcing
+        pathological over-diversification.
         """
         result = recommend(
             ["Dune", "Emma"], store, projection, n=12, config=RecommendConfig()
         )
-        communities = {store.node_community(r.work_id) for r in result.recommendations}
-        assert len(communities) >= 3
+        communities = [store.node_community(r.work_id) for r in result.recommendations]
+        distinct = set(communities)
+        assert len(distinct) >= 2, f"collapsed into {distinct}"
+
+        largest = max(Counter(communities).values())
+        assert largest < 0.8 * len(communities), (
+            f"one community holds {largest} of {len(communities)} results"
+        )
 
     def test_mixed_seeds_pull_from_both_regions(self, store, projection) -> None:
         result = recommend(["Dune", "Emma"], store, projection, n=16)

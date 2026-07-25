@@ -72,6 +72,33 @@ class TestMMR:
         projection, scores, _ = _mmr_setup()
         assert mmr_rerank([], scores, projection, n=5) == []
 
+    def test_selection_is_invariant_to_score_scale(self) -> None:
+        """Rescaling every score by a positive constant must not reorder results.
+
+        ``lambda_ * score - (1 - lambda_) * jaccard`` mixes two quantities that
+        are only comparable if they share a scale. Jaccard is bounded to [0, 1],
+        but raw PPR mass on a real graph is ~0.01, so without normalisation the
+        redundancy term outweighs relevance by an order of magnitude and MMR
+        degenerates into selecting purely for dissimilarity -- returning
+        philosophy for a hard-SF seed set.
+        """
+        projection, scores, rows = _mmr_setup()
+        baseline = mmr_rerank(rows, scores, projection, n=3, lambda_=0.7)
+        for factor in (0.01, 0.5, 100.0):
+            rescaled = mmr_rerank(rows, scores * factor, projection, n=3, lambda_=0.7)
+            assert rescaled == baseline, f"order changed when scores scaled by {factor}"
+
+    def test_relevance_still_dominates_at_realistic_ppr_magnitudes(self) -> None:
+        """At PPR-sized scores the top-ranked candidate must still be chosen first.
+
+        The failure this pins is subtle: every ordering assertion elsewhere uses
+        scores near 1.0, so a scale bug passes the whole suite while wrecking
+        real recommendations.
+        """
+        projection, scores, rows = _mmr_setup()
+        got = mmr_rerank(rows, scores * 0.008, projection, n=3, lambda_=0.7)
+        assert projection.work_ids[got[0]] == "A"
+
 
 @pytest.fixture
 def recommend_store(store):
@@ -92,13 +119,26 @@ def recommend_store(store):
     ]
     sf = ["w-dune", "w-messiah", "w-foundation", "w-hyperion", "w-blindsight"]
     lit = ["w-emma", "w-persuasion"]
+
+    # A bestseller's defining feature is a degree far above everything around
+    # it. Wired only to the two clusters, "Popular Everything" would reach degree
+    # 7 against the cluster's 5 -- too flat for damping to have anything to bite
+    # on, so the assertion below could not distinguish a working implementation
+    # from a no-op. These filler titles hang off the hub alone, which is exactly
+    # how a real co-purchase graph gives its bestsellers their degree.
+    filler = [f"w-filler-{i}" for i in range(20)]
+    books += [
+        Book(work_id=work_id, title=f"Filler Volume {i}", authors=(f"Author {i}",))
+        for i, work_id in enumerate(filler)
+    ]
+
     edges: list[Edge] = []
     for group in (sf, lit):
         for i, a in enumerate(group):
             for rank, b in enumerate(group[i + 1 :], start=1):
                 edges.append(Edge(a, b, EdgeKind.GR_SIMILAR, rank, SourceName.DEMO))
                 edges.append(Edge(b, a, EdgeKind.GR_SIMILAR, rank, SourceName.DEMO))
-    for node in sf + lit:
+    for node in sf + lit + filler:
         edges.append(Edge("w-hub", node, EdgeKind.AZ_ALSO_BOUGHT, 1, SourceName.DEMO))
         edges.append(Edge(node, "w-hub", EdgeKind.AZ_ALSO_BOUGHT, 1, SourceName.DEMO))
 
