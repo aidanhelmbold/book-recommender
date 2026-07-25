@@ -1,0 +1,6008 @@
+{
+ "_provenance": "Hand-authored demo fixture. The book titles and authors are real; the connections between them are a designed graph structure, not observed behaviour. This is NOT scraped from Amazon or Goodreads and must not be presented as real 'customers also bought' or 'readers also enjoyed' data. It exists so the pipeline is runnable and testable without a multi-gigabyte download. For real data see the ingest commands in README.md.",
+ "books": [
+  {
+   "id": "dune",
+   "title": "Dune",
+   "authors": [
+    "Frank Herbert"
+   ],
+   "year": 1965,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "dune-messiah",
+   "title": "Dune Messiah",
+   "authors": [
+    "Frank Herbert"
+   ],
+   "year": 1969,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "children-of-dune",
+   "title": "Children of Dune",
+   "authors": [
+    "Frank Herbert"
+   ],
+   "year": 1976,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "foundation",
+   "title": "Foundation",
+   "authors": [
+    "Isaac Asimov"
+   ],
+   "year": 1951,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "foundation-and-empire",
+   "title": "Foundation and Empire",
+   "authors": [
+    "Isaac Asimov"
+   ],
+   "year": 1952,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "second-foundation",
+   "title": "Second Foundation",
+   "authors": [
+    "Isaac Asimov"
+   ],
+   "year": 1953,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "i-robot",
+   "title": "I, Robot",
+   "authors": [
+    "Isaac Asimov"
+   ],
+   "year": 1950,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "hyperion",
+   "title": "Hyperion",
+   "authors": [
+    "Dan Simmons"
+   ],
+   "year": 1989,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "the-fall-of-hyperion",
+   "title": "The Fall of Hyperion",
+   "authors": [
+    "Dan Simmons"
+   ],
+   "year": 1990,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "blindsight",
+   "title": "Blindsight",
+   "authors": [
+    "Peter Watts"
+   ],
+   "year": 2006,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "rendezvous-with-rama",
+   "title": "Rendezvous with Rama",
+   "authors": [
+    "Arthur C. Clarke"
+   ],
+   "year": 1973,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "childhood-s-end",
+   "title": "Childhood's End",
+   "authors": [
+    "Arthur C. Clarke"
+   ],
+   "year": 1953,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "2001-a-space-odyssey",
+   "title": "2001: A Space Odyssey",
+   "authors": [
+    "Arthur C. Clarke"
+   ],
+   "year": 1968,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "the-left-hand-of-darkness",
+   "title": "The Left Hand of Darkness",
+   "authors": [
+    "Ursula K. Le Guin"
+   ],
+   "year": 1969,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "the-dispossessed",
+   "title": "The Dispossessed",
+   "authors": [
+    "Ursula K. Le Guin"
+   ],
+   "year": 1974,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "neuromancer",
+   "title": "Neuromancer",
+   "authors": [
+    "William Gibson"
+   ],
+   "year": 1984,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "snow-crash",
+   "title": "Snow Crash",
+   "authors": [
+    "Neal Stephenson"
+   ],
+   "year": 1992,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "cryptonomicon",
+   "title": "Cryptonomicon",
+   "authors": [
+    "Neal Stephenson"
+   ],
+   "year": 1999,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "anathem",
+   "title": "Anathem",
+   "authors": [
+    "Neal Stephenson"
+   ],
+   "year": 2008,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "a-fire-upon-the-deep",
+   "title": "A Fire Upon the Deep",
+   "authors": [
+    "Vernor Vinge"
+   ],
+   "year": 1992,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "the-quantum-thief",
+   "title": "The Quantum Thief",
+   "authors": [
+    "Hannu Rajaniemi"
+   ],
+   "year": 2010,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "revelation-space",
+   "title": "Revelation Space",
+   "authors": [
+    "Alastair Reynolds"
+   ],
+   "year": 2000,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "house-of-suns",
+   "title": "House of Suns",
+   "authors": [
+    "Alastair Reynolds"
+   ],
+   "year": 2008,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "the-three-body-problem",
+   "title": "The Three-Body Problem",
+   "authors": [
+    "Liu Cixin"
+   ],
+   "year": 2008,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "the-dark-forest",
+   "title": "The Dark Forest",
+   "authors": [
+    "Liu Cixin"
+   ],
+   "year": 2008,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "death-s-end",
+   "title": "Death's End",
+   "authors": [
+    "Liu Cixin"
+   ],
+   "year": 2010,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "ancillary-justice",
+   "title": "Ancillary Justice",
+   "authors": [
+    "Ann Leckie"
+   ],
+   "year": 2013,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "a-memory-called-empire",
+   "title": "A Memory Called Empire",
+   "authors": [
+    "Arkady Martine"
+   ],
+   "year": 2019,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "project-hail-mary",
+   "title": "Project Hail Mary",
+   "authors": [
+    "Andy Weir"
+   ],
+   "year": 2021,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "the-martian",
+   "title": "The Martian",
+   "authors": [
+    "Andy Weir"
+   ],
+   "year": 2011,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "solaris",
+   "title": "Solaris",
+   "authors": [
+    "Stanislaw Lem"
+   ],
+   "year": 1961,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "roadside-picnic",
+   "title": "Roadside Picnic",
+   "authors": [
+    "Arkady Strugatsky"
+   ],
+   "year": 1972,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "the-stars-my-destination",
+   "title": "The Stars My Destination",
+   "authors": [
+    "Alfred Bester"
+   ],
+   "year": 1956,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "ubik",
+   "title": "Ubik",
+   "authors": [
+    "Philip K. Dick"
+   ],
+   "year": 1969,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "do-androids-dream-of-electric-sheep",
+   "title": "Do Androids Dream of Electric Sheep?",
+   "authors": [
+    "Philip K. Dick"
+   ],
+   "year": 1968,
+   "subjects": [
+    "science fiction",
+    "space opera",
+    "hard sf",
+    "far future"
+   ]
+  },
+  {
+   "id": "the-hobbit",
+   "title": "The Hobbit",
+   "authors": [
+    "J.R.R. Tolkien"
+   ],
+   "year": 1937,
+   "subjects": [
+    "fantasy",
+    "epic fantasy",
+    "secondary world",
+    "quest"
+   ]
+  },
+  {
+   "id": "the-fellowship-of-the-ring",
+   "title": "The Fellowship of the Ring",
+   "authors": [
+    "J.R.R. Tolkien"
+   ],
+   "year": 1954,
+   "subjects": [
+    "fantasy",
+    "epic fantasy",
+    "secondary world",
+    "quest"
+   ]
+  },
+  {
+   "id": "the-two-towers",
+   "title": "The Two Towers",
+   "authors": [
+    "J.R.R. Tolkien"
+   ],
+   "year": 1954,
+   "subjects": [
+    "fantasy",
+    "epic fantasy",
+    "secondary world",
+    "quest"
+   ]
+  },
+  {
+   "id": "the-return-of-the-king",
+   "title": "The Return of the King",
+   "authors": [
+    "J.R.R. Tolkien"
+   ],
+   "year": 1955,
+   "subjects": [
+    "fantasy",
+    "epic fantasy",
+    "secondary world",
+    "quest"
+   ]
+  },
+  {
+   "id": "the-silmarillion",
+   "title": "The Silmarillion",
+   "authors": [
+    "J.R.R. Tolkien"
+   ],
+   "year": 1977,
+   "subjects": [
+    "fantasy",
+    "epic fantasy",
+    "secondary world",
+    "quest"
+   ]
+  },
+  {
+   "id": "a-game-of-thrones",
+   "title": "A Game of Thrones",
+   "authors": [
+    "George R.R. Martin"
+   ],
+   "year": 1996,
+   "subjects": [
+    "fantasy",
+    "epic fantasy",
+    "secondary world",
+    "quest"
+   ]
+  },
+  {
+   "id": "a-clash-of-kings",
+   "title": "A Clash of Kings",
+   "authors": [
+    "George R.R. Martin"
+   ],
+   "year": 1998,
+   "subjects": [
+    "fantasy",
+    "epic fantasy",
+    "secondary world",
+    "quest"
+   ]
+  },
+  {
+   "id": "a-storm-of-swords",
+   "title": "A Storm of Swords",
+   "authors": [
+    "George R.R. Martin"
+   ],
+   "year": 2000,
+   "subjects": [
+    "fantasy",
+    "epic fantasy",
+    "secondary world",
+    "quest"
+   ]
+  },
+  {
+   "id": "the-name-of-the-wind",
+   "title": "The Name of the Wind",
+   "authors": [
+    "Patrick Rothfuss"
+   ],
+   "year": 2007,
+   "subjects": [
+    "fantasy",
+    "epic fantasy",
+    "secondary world",
+    "quest"
+   ]
+  },
+  {
+   "id": "the-wise-man-s-fear",
+   "title": "The Wise Man's Fear",
+   "authors": [
+    "Patrick Rothfuss"
+   ],
+   "year": 2011,
+   "subjects": [
+    "fantasy",
+    "epic fantasy",
+    "secondary world",
+    "quest"
+   ]
+  },
+  {
+   "id": "the-way-of-kings",
+   "title": "The Way of Kings",
+   "authors": [
+    "Brandon Sanderson"
+   ],
+   "year": 2010,
+   "subjects": [
+    "fantasy",
+    "epic fantasy",
+    "secondary world",
+    "quest"
+   ]
+  },
+  {
+   "id": "words-of-radiance",
+   "title": "Words of Radiance",
+   "authors": [
+    "Brandon Sanderson"
+   ],
+   "year": 2014,
+   "subjects": [
+    "fantasy",
+    "epic fantasy",
+    "secondary world",
+    "quest"
+   ]
+  },
+  {
+   "id": "mistborn",
+   "title": "Mistborn",
+   "authors": [
+    "Brandon Sanderson"
+   ],
+   "year": 2006,
+   "subjects": [
+    "fantasy",
+    "epic fantasy",
+    "secondary world",
+    "quest"
+   ]
+  },
+  {
+   "id": "the-blade-itself",
+   "title": "The Blade Itself",
+   "authors": [
+    "Joe Abercrombie"
+   ],
+   "year": 2006,
+   "subjects": [
+    "fantasy",
+    "epic fantasy",
+    "secondary world",
+    "quest"
+   ]
+  },
+  {
+   "id": "the-lies-of-locke-lamora",
+   "title": "The Lies of Locke Lamora",
+   "authors": [
+    "Scott Lynch"
+   ],
+   "year": 2006,
+   "subjects": [
+    "fantasy",
+    "epic fantasy",
+    "secondary world",
+    "quest"
+   ]
+  },
+  {
+   "id": "a-wizard-of-earthsea",
+   "title": "A Wizard of Earthsea",
+   "authors": [
+    "Ursula K. Le Guin"
+   ],
+   "year": 1968,
+   "subjects": [
+    "fantasy",
+    "epic fantasy",
+    "secondary world",
+    "quest"
+   ]
+  },
+  {
+   "id": "the-tombs-of-atuan",
+   "title": "The Tombs of Atuan",
+   "authors": [
+    "Ursula K. Le Guin"
+   ],
+   "year": 1971,
+   "subjects": [
+    "fantasy",
+    "epic fantasy",
+    "secondary world",
+    "quest"
+   ]
+  },
+  {
+   "id": "assassin-s-apprentice",
+   "title": "Assassin's Apprentice",
+   "authors": [
+    "Robin Hobb"
+   ],
+   "year": 1995,
+   "subjects": [
+    "fantasy",
+    "epic fantasy",
+    "secondary world",
+    "quest"
+   ]
+  },
+  {
+   "id": "the-fifth-season",
+   "title": "The Fifth Season",
+   "authors": [
+    "N.K. Jemisin"
+   ],
+   "year": 2015,
+   "subjects": [
+    "fantasy",
+    "epic fantasy",
+    "secondary world",
+    "quest"
+   ]
+  },
+  {
+   "id": "the-obelisk-gate",
+   "title": "The Obelisk Gate",
+   "authors": [
+    "N.K. Jemisin"
+   ],
+   "year": 2016,
+   "subjects": [
+    "fantasy",
+    "epic fantasy",
+    "secondary world",
+    "quest"
+   ]
+  },
+  {
+   "id": "jonathan-strange-mr-norrell",
+   "title": "Jonathan Strange & Mr Norrell",
+   "authors": [
+    "Susanna Clarke"
+   ],
+   "year": 2004,
+   "subjects": [
+    "fantasy",
+    "epic fantasy",
+    "secondary world",
+    "quest"
+   ]
+  },
+  {
+   "id": "the-priory-of-the-orange-tree",
+   "title": "The Priory of the Orange Tree",
+   "authors": [
+    "Samantha Shannon"
+   ],
+   "year": 2019,
+   "subjects": [
+    "fantasy",
+    "epic fantasy",
+    "secondary world",
+    "quest"
+   ]
+  },
+  {
+   "id": "piranesi",
+   "title": "Piranesi",
+   "authors": [
+    "Susanna Clarke"
+   ],
+   "year": 2020,
+   "subjects": [
+    "fantasy",
+    "epic fantasy",
+    "secondary world",
+    "quest"
+   ]
+  },
+  {
+   "id": "the-curse-of-chalion",
+   "title": "The Curse of Chalion",
+   "authors": [
+    "Lois McMaster Bujold"
+   ],
+   "year": 2001,
+   "subjects": [
+    "fantasy",
+    "epic fantasy",
+    "secondary world",
+    "quest"
+   ]
+  },
+  {
+   "id": "middlemarch",
+   "title": "Middlemarch",
+   "authors": [
+    "George Eliot"
+   ],
+   "year": 1871,
+   "subjects": [
+    "literary fiction",
+    "classics",
+    "social realism"
+   ]
+  },
+  {
+   "id": "anna-karenina",
+   "title": "Anna Karenina",
+   "authors": [
+    "Leo Tolstoy"
+   ],
+   "year": 1878,
+   "subjects": [
+    "literary fiction",
+    "classics",
+    "social realism"
+   ]
+  },
+  {
+   "id": "war-and-peace",
+   "title": "War and Peace",
+   "authors": [
+    "Leo Tolstoy"
+   ],
+   "year": 1869,
+   "subjects": [
+    "literary fiction",
+    "classics",
+    "social realism"
+   ]
+  },
+  {
+   "id": "crime-and-punishment",
+   "title": "Crime and Punishment",
+   "authors": [
+    "Fyodor Dostoevsky"
+   ],
+   "year": 1866,
+   "subjects": [
+    "literary fiction",
+    "classics",
+    "social realism"
+   ]
+  },
+  {
+   "id": "the-brothers-karamazov",
+   "title": "The Brothers Karamazov",
+   "authors": [
+    "Fyodor Dostoevsky"
+   ],
+   "year": 1880,
+   "subjects": [
+    "literary fiction",
+    "classics",
+    "social realism"
+   ]
+  },
+  {
+   "id": "madame-bovary",
+   "title": "Madame Bovary",
+   "authors": [
+    "Gustave Flaubert"
+   ],
+   "year": 1856,
+   "subjects": [
+    "literary fiction",
+    "classics",
+    "social realism"
+   ]
+  },
+  {
+   "id": "great-expectations",
+   "title": "Great Expectations",
+   "authors": [
+    "Charles Dickens"
+   ],
+   "year": 1861,
+   "subjects": [
+    "literary fiction",
+    "classics",
+    "social realism"
+   ]
+  },
+  {
+   "id": "bleak-house",
+   "title": "Bleak House",
+   "authors": [
+    "Charles Dickens"
+   ],
+   "year": 1853,
+   "subjects": [
+    "literary fiction",
+    "classics",
+    "social realism"
+   ]
+  },
+  {
+   "id": "jane-eyre",
+   "title": "Jane Eyre",
+   "authors": [
+    "Charlotte Bronte"
+   ],
+   "year": 1847,
+   "subjects": [
+    "literary fiction",
+    "classics",
+    "social realism"
+   ]
+  },
+  {
+   "id": "wuthering-heights",
+   "title": "Wuthering Heights",
+   "authors": [
+    "Emily Bronte"
+   ],
+   "year": 1847,
+   "subjects": [
+    "literary fiction",
+    "classics",
+    "social realism"
+   ]
+  },
+  {
+   "id": "mrs-dalloway",
+   "title": "Mrs Dalloway",
+   "authors": [
+    "Virginia Woolf"
+   ],
+   "year": 1925,
+   "subjects": [
+    "literary fiction",
+    "classics",
+    "social realism"
+   ]
+  },
+  {
+   "id": "to-the-lighthouse",
+   "title": "To the Lighthouse",
+   "authors": [
+    "Virginia Woolf"
+   ],
+   "year": 1927,
+   "subjects": [
+    "literary fiction",
+    "classics",
+    "social realism"
+   ]
+  },
+  {
+   "id": "the-great-gatsby",
+   "title": "The Great Gatsby",
+   "authors": [
+    "F. Scott Fitzgerald"
+   ],
+   "year": 1925,
+   "subjects": [
+    "literary fiction",
+    "classics",
+    "social realism"
+   ]
+  },
+  {
+   "id": "beloved",
+   "title": "Beloved",
+   "authors": [
+    "Toni Morrison"
+   ],
+   "year": 1987,
+   "subjects": [
+    "literary fiction",
+    "classics",
+    "social realism"
+   ]
+  },
+  {
+   "id": "song-of-solomon",
+   "title": "Song of Solomon",
+   "authors": [
+    "Toni Morrison"
+   ],
+   "year": 1977,
+   "subjects": [
+    "literary fiction",
+    "classics",
+    "social realism"
+   ]
+  },
+  {
+   "id": "one-hundred-years-of-solitude",
+   "title": "One Hundred Years of Solitude",
+   "authors": [
+    "Gabriel Garcia Marquez"
+   ],
+   "year": 1967,
+   "subjects": [
+    "literary fiction",
+    "classics",
+    "social realism"
+   ]
+  },
+  {
+   "id": "love-in-the-time-of-cholera",
+   "title": "Love in the Time of Cholera",
+   "authors": [
+    "Gabriel Garcia Marquez"
+   ],
+   "year": 1985,
+   "subjects": [
+    "literary fiction",
+    "classics",
+    "social realism"
+   ]
+  },
+  {
+   "id": "things-fall-apart",
+   "title": "Things Fall Apart",
+   "authors": [
+    "Chinua Achebe"
+   ],
+   "year": 1958,
+   "subjects": [
+    "literary fiction",
+    "classics",
+    "social realism"
+   ]
+  },
+  {
+   "id": "the-remains-of-the-day",
+   "title": "The Remains of the Day",
+   "authors": [
+    "Kazuo Ishiguro"
+   ],
+   "year": 1989,
+   "subjects": [
+    "literary fiction",
+    "classics",
+    "social realism"
+   ]
+  },
+  {
+   "id": "never-let-me-go",
+   "title": "Never Let Me Go",
+   "authors": [
+    "Kazuo Ishiguro"
+   ],
+   "year": 2005,
+   "subjects": [
+    "literary fiction",
+    "classics",
+    "social realism"
+   ]
+  },
+  {
+   "id": "a-fine-balance",
+   "title": "A Fine Balance",
+   "authors": [
+    "Rohinton Mistry"
+   ],
+   "year": 1995,
+   "subjects": [
+    "literary fiction",
+    "classics",
+    "social realism"
+   ]
+  },
+  {
+   "id": "lincoln-in-the-bardo",
+   "title": "Lincoln in the Bardo",
+   "authors": [
+    "George Saunders"
+   ],
+   "year": 2017,
+   "subjects": [
+    "literary fiction",
+    "classics",
+    "social realism"
+   ]
+  },
+  {
+   "id": "gilead",
+   "title": "Gilead",
+   "authors": [
+    "Marilynne Robinson"
+   ],
+   "year": 2004,
+   "subjects": [
+    "literary fiction",
+    "classics",
+    "social realism"
+   ]
+  },
+  {
+   "id": "stoner",
+   "title": "Stoner",
+   "authors": [
+    "John Williams"
+   ],
+   "year": 1965,
+   "subjects": [
+    "literary fiction",
+    "classics",
+    "social realism"
+   ]
+  },
+  {
+   "id": "pride-and-prejudice",
+   "title": "Pride and Prejudice",
+   "authors": [
+    "Jane Austen"
+   ],
+   "year": 1813,
+   "subjects": [
+    "romance",
+    "regency",
+    "historical romance",
+    "courtship"
+   ]
+  },
+  {
+   "id": "emma",
+   "title": "Emma",
+   "authors": [
+    "Jane Austen"
+   ],
+   "year": 1815,
+   "subjects": [
+    "romance",
+    "regency",
+    "historical romance",
+    "courtship"
+   ]
+  },
+  {
+   "id": "sense-and-sensibility",
+   "title": "Sense and Sensibility",
+   "authors": [
+    "Jane Austen"
+   ],
+   "year": 1811,
+   "subjects": [
+    "romance",
+    "regency",
+    "historical romance",
+    "courtship"
+   ]
+  },
+  {
+   "id": "persuasion",
+   "title": "Persuasion",
+   "authors": [
+    "Jane Austen"
+   ],
+   "year": 1817,
+   "subjects": [
+    "romance",
+    "regency",
+    "historical romance",
+    "courtship"
+   ]
+  },
+  {
+   "id": "mansfield-park",
+   "title": "Mansfield Park",
+   "authors": [
+    "Jane Austen"
+   ],
+   "year": 1814,
+   "subjects": [
+    "romance",
+    "regency",
+    "historical romance",
+    "courtship"
+   ]
+  },
+  {
+   "id": "northanger-abbey",
+   "title": "Northanger Abbey",
+   "authors": [
+    "Jane Austen"
+   ],
+   "year": 1817,
+   "subjects": [
+    "romance",
+    "regency",
+    "historical romance",
+    "courtship"
+   ]
+  },
+  {
+   "id": "the-grand-sophy",
+   "title": "The Grand Sophy",
+   "authors": [
+    "Georgette Heyer"
+   ],
+   "year": 1950,
+   "subjects": [
+    "romance",
+    "regency",
+    "historical romance",
+    "courtship"
+   ]
+  },
+  {
+   "id": "frederica",
+   "title": "Frederica",
+   "authors": [
+    "Georgette Heyer"
+   ],
+   "year": 1965,
+   "subjects": [
+    "romance",
+    "regency",
+    "historical romance",
+    "courtship"
+   ]
+  },
+  {
+   "id": "venetia",
+   "title": "Venetia",
+   "authors": [
+    "Georgette Heyer"
+   ],
+   "year": 1958,
+   "subjects": [
+    "romance",
+    "regency",
+    "historical romance",
+    "courtship"
+   ]
+  },
+  {
+   "id": "the-duke-and-i",
+   "title": "The Duke and I",
+   "authors": [
+    "Julia Quinn"
+   ],
+   "year": 2000,
+   "subjects": [
+    "romance",
+    "regency",
+    "historical romance",
+    "courtship"
+   ]
+  },
+  {
+   "id": "romancing-mister-bridgerton",
+   "title": "Romancing Mister Bridgerton",
+   "authors": [
+    "Julia Quinn"
+   ],
+   "year": 2002,
+   "subjects": [
+    "romance",
+    "regency",
+    "historical romance",
+    "courtship"
+   ]
+  },
+  {
+   "id": "devil-in-winter",
+   "title": "Devil in Winter",
+   "authors": [
+    "Lisa Kleypas"
+   ],
+   "year": 2006,
+   "subjects": [
+    "romance",
+    "regency",
+    "historical romance",
+    "courtship"
+   ]
+  },
+  {
+   "id": "a-rogue-of-one-s-own",
+   "title": "A Rogue of One's Own",
+   "authors": [
+    "Evie Dunmore"
+   ],
+   "year": 2020,
+   "subjects": [
+    "romance",
+    "regency",
+    "historical romance",
+    "courtship"
+   ]
+  },
+  {
+   "id": "bringing-down-the-duke",
+   "title": "Bringing Down the Duke",
+   "authors": [
+    "Evie Dunmore"
+   ],
+   "year": 2019,
+   "subjects": [
+    "romance",
+    "regency",
+    "historical romance",
+    "courtship"
+   ]
+  },
+  {
+   "id": "the-duchess-deal",
+   "title": "The Duchess Deal",
+   "authors": [
+    "Tessa Dare"
+   ],
+   "year": 2017,
+   "subjects": [
+    "romance",
+    "regency",
+    "historical romance",
+    "courtship"
+   ]
+  },
+  {
+   "id": "the-hound-of-the-baskervilles",
+   "title": "The Hound of the Baskervilles",
+   "authors": [
+    "Arthur Conan Doyle"
+   ],
+   "year": 1902,
+   "subjects": [
+    "mystery",
+    "crime",
+    "detective",
+    "thriller"
+   ]
+  },
+  {
+   "id": "a-study-in-scarlet",
+   "title": "A Study in Scarlet",
+   "authors": [
+    "Arthur Conan Doyle"
+   ],
+   "year": 1887,
+   "subjects": [
+    "mystery",
+    "crime",
+    "detective",
+    "thriller"
+   ]
+  },
+  {
+   "id": "the-adventures-of-sherlock-holmes",
+   "title": "The Adventures of Sherlock Holmes",
+   "authors": [
+    "Arthur Conan Doyle"
+   ],
+   "year": 1892,
+   "subjects": [
+    "mystery",
+    "crime",
+    "detective",
+    "thriller"
+   ]
+  },
+  {
+   "id": "murder-on-the-orient-express",
+   "title": "Murder on the Orient Express",
+   "authors": [
+    "Agatha Christie"
+   ],
+   "year": 1934,
+   "subjects": [
+    "mystery",
+    "crime",
+    "detective",
+    "thriller"
+   ]
+  },
+  {
+   "id": "and-then-there-were-none",
+   "title": "And Then There Were None",
+   "authors": [
+    "Agatha Christie"
+   ],
+   "year": 1939,
+   "subjects": [
+    "mystery",
+    "crime",
+    "detective",
+    "thriller"
+   ]
+  },
+  {
+   "id": "the-murder-of-roger-ackroyd",
+   "title": "The Murder of Roger Ackroyd",
+   "authors": [
+    "Agatha Christie"
+   ],
+   "year": 1926,
+   "subjects": [
+    "mystery",
+    "crime",
+    "detective",
+    "thriller"
+   ]
+  },
+  {
+   "id": "the-big-sleep",
+   "title": "The Big Sleep",
+   "authors": [
+    "Raymond Chandler"
+   ],
+   "year": 1939,
+   "subjects": [
+    "mystery",
+    "crime",
+    "detective",
+    "thriller"
+   ]
+  },
+  {
+   "id": "the-maltese-falcon",
+   "title": "The Maltese Falcon",
+   "authors": [
+    "Dashiell Hammett"
+   ],
+   "year": 1930,
+   "subjects": [
+    "mystery",
+    "crime",
+    "detective",
+    "thriller"
+   ]
+  },
+  {
+   "id": "the-girl-with-the-dragon-tattoo",
+   "title": "The Girl with the Dragon Tattoo",
+   "authors": [
+    "Stieg Larsson"
+   ],
+   "year": 2005,
+   "subjects": [
+    "mystery",
+    "crime",
+    "detective",
+    "thriller"
+   ]
+  },
+  {
+   "id": "gone-girl",
+   "title": "Gone Girl",
+   "authors": [
+    "Gillian Flynn"
+   ],
+   "year": 2012,
+   "subjects": [
+    "mystery",
+    "crime",
+    "detective",
+    "thriller"
+   ]
+  },
+  {
+   "id": "sharp-objects",
+   "title": "Sharp Objects",
+   "authors": [
+    "Gillian Flynn"
+   ],
+   "year": 2006,
+   "subjects": [
+    "mystery",
+    "crime",
+    "detective",
+    "thriller"
+   ]
+  },
+  {
+   "id": "the-silence-of-the-lambs",
+   "title": "The Silence of the Lambs",
+   "authors": [
+    "Thomas Harris"
+   ],
+   "year": 1988,
+   "subjects": [
+    "mystery",
+    "crime",
+    "detective",
+    "thriller"
+   ]
+  },
+  {
+   "id": "in-the-woods",
+   "title": "In the Woods",
+   "authors": [
+    "Tana French"
+   ],
+   "year": 2007,
+   "subjects": [
+    "mystery",
+    "crime",
+    "detective",
+    "thriller"
+   ]
+  },
+  {
+   "id": "the-secret-history",
+   "title": "The Secret History",
+   "authors": [
+    "Donna Tartt"
+   ],
+   "year": 1992,
+   "subjects": [
+    "mystery",
+    "crime",
+    "detective",
+    "thriller"
+   ]
+  },
+  {
+   "id": "mystic-river",
+   "title": "Mystic River",
+   "authors": [
+    "Dennis Lehane"
+   ],
+   "year": 2001,
+   "subjects": [
+    "mystery",
+    "crime",
+    "detective",
+    "thriller"
+   ]
+  },
+  {
+   "id": "the-no-1-ladies-detective-agency",
+   "title": "The No. 1 Ladies' Detective Agency",
+   "authors": [
+    "Alexander McCall Smith"
+   ],
+   "year": 1998,
+   "subjects": [
+    "mystery",
+    "crime",
+    "detective",
+    "thriller"
+   ]
+  },
+  {
+   "id": "snow-falling-on-cedars",
+   "title": "Snow Falling on Cedars",
+   "authors": [
+    "David Guterson"
+   ],
+   "year": 1994,
+   "subjects": [
+    "mystery",
+    "crime",
+    "detective",
+    "thriller"
+   ]
+  },
+  {
+   "id": "the-thursday-murder-club",
+   "title": "The Thursday Murder Club",
+   "authors": [
+    "Richard Osman"
+   ],
+   "year": 2020,
+   "subjects": [
+    "mystery",
+    "crime",
+    "detective",
+    "thriller"
+   ]
+  },
+  {
+   "id": "the-shining",
+   "title": "The Shining",
+   "authors": [
+    "Stephen King"
+   ],
+   "year": 1977,
+   "subjects": [
+    "horror",
+    "gothic",
+    "weird fiction",
+    "supernatural"
+   ]
+  },
+  {
+   "id": "it",
+   "title": "It",
+   "authors": [
+    "Stephen King"
+   ],
+   "year": 1986,
+   "subjects": [
+    "horror",
+    "gothic",
+    "weird fiction",
+    "supernatural"
+   ]
+  },
+  {
+   "id": "pet-sematary",
+   "title": "Pet Sematary",
+   "authors": [
+    "Stephen King"
+   ],
+   "year": 1983,
+   "subjects": [
+    "horror",
+    "gothic",
+    "weird fiction",
+    "supernatural"
+   ]
+  },
+  {
+   "id": "dracula",
+   "title": "Dracula",
+   "authors": [
+    "Bram Stoker"
+   ],
+   "year": 1897,
+   "subjects": [
+    "horror",
+    "gothic",
+    "weird fiction",
+    "supernatural"
+   ]
+  },
+  {
+   "id": "frankenstein",
+   "title": "Frankenstein",
+   "authors": [
+    "Mary Shelley"
+   ],
+   "year": 1818,
+   "subjects": [
+    "horror",
+    "gothic",
+    "weird fiction",
+    "supernatural"
+   ]
+  },
+  {
+   "id": "the-haunting-of-hill-house",
+   "title": "The Haunting of Hill House",
+   "authors": [
+    "Shirley Jackson"
+   ],
+   "year": 1959,
+   "subjects": [
+    "horror",
+    "gothic",
+    "weird fiction",
+    "supernatural"
+   ]
+  },
+  {
+   "id": "we-have-always-lived-in-the-castle",
+   "title": "We Have Always Lived in the Castle",
+   "authors": [
+    "Shirley Jackson"
+   ],
+   "year": 1962,
+   "subjects": [
+    "horror",
+    "gothic",
+    "weird fiction",
+    "supernatural"
+   ]
+  },
+  {
+   "id": "at-the-mountains-of-madness",
+   "title": "At the Mountains of Madness",
+   "authors": [
+    "H.P. Lovecraft"
+   ],
+   "year": 1936,
+   "subjects": [
+    "horror",
+    "gothic",
+    "weird fiction",
+    "supernatural"
+   ]
+  },
+  {
+   "id": "annihilation",
+   "title": "Annihilation",
+   "authors": [
+    "Jeff VanderMeer"
+   ],
+   "year": 2014,
+   "subjects": [
+    "horror",
+    "gothic",
+    "weird fiction",
+    "supernatural"
+   ]
+  },
+  {
+   "id": "the-fisherman",
+   "title": "The Fisherman",
+   "authors": [
+    "John Langan"
+   ],
+   "year": 2016,
+   "subjects": [
+    "horror",
+    "gothic",
+    "weird fiction",
+    "supernatural"
+   ]
+  },
+  {
+   "id": "mexican-gothic",
+   "title": "Mexican Gothic",
+   "authors": [
+    "Silvia Moreno-Garcia"
+   ],
+   "year": 2020,
+   "subjects": [
+    "horror",
+    "gothic",
+    "weird fiction",
+    "supernatural"
+   ]
+  },
+  {
+   "id": "house-of-leaves",
+   "title": "House of Leaves",
+   "authors": [
+    "Mark Z. Danielewski"
+   ],
+   "year": 2000,
+   "subjects": [
+    "horror",
+    "gothic",
+    "weird fiction",
+    "supernatural"
+   ]
+  },
+  {
+   "id": "the-only-good-indians",
+   "title": "The Only Good Indians",
+   "authors": [
+    "Stephen Graham Jones"
+   ],
+   "year": 2020,
+   "subjects": [
+    "horror",
+    "gothic",
+    "weird fiction",
+    "supernatural"
+   ]
+  },
+  {
+   "id": "tender-is-the-flesh",
+   "title": "Tender Is the Flesh",
+   "authors": [
+    "Agustina Bazterrica"
+   ],
+   "year": 2017,
+   "subjects": [
+    "horror",
+    "gothic",
+    "weird fiction",
+    "supernatural"
+   ]
+  },
+  {
+   "id": "a-brief-history-of-time",
+   "title": "A Brief History of Time",
+   "authors": [
+    "Stephen Hawking"
+   ],
+   "year": 1988,
+   "subjects": [
+    "popular science",
+    "nonfiction",
+    "physics",
+    "biology"
+   ]
+  },
+  {
+   "id": "cosmos",
+   "title": "Cosmos",
+   "authors": [
+    "Carl Sagan"
+   ],
+   "year": 1980,
+   "subjects": [
+    "popular science",
+    "nonfiction",
+    "physics",
+    "biology"
+   ]
+  },
+  {
+   "id": "the-demon-haunted-world",
+   "title": "The Demon-Haunted World",
+   "authors": [
+    "Carl Sagan"
+   ],
+   "year": 1995,
+   "subjects": [
+    "popular science",
+    "nonfiction",
+    "physics",
+    "biology"
+   ]
+  },
+  {
+   "id": "the-selfish-gene",
+   "title": "The Selfish Gene",
+   "authors": [
+    "Richard Dawkins"
+   ],
+   "year": 1976,
+   "subjects": [
+    "popular science",
+    "nonfiction",
+    "physics",
+    "biology"
+   ]
+  },
+  {
+   "id": "guns-germs-and-steel",
+   "title": "Guns, Germs, and Steel",
+   "authors": [
+    "Jared Diamond"
+   ],
+   "year": 1997,
+   "subjects": [
+    "popular science",
+    "nonfiction",
+    "physics",
+    "biology"
+   ]
+  },
+  {
+   "id": "sapiens",
+   "title": "Sapiens",
+   "authors": [
+    "Yuval Noah Harari"
+   ],
+   "year": 2011,
+   "subjects": [
+    "popular science",
+    "nonfiction",
+    "physics",
+    "biology"
+   ]
+  },
+  {
+   "id": "homo-deus",
+   "title": "Homo Deus",
+   "authors": [
+    "Yuval Noah Harari"
+   ],
+   "year": 2015,
+   "subjects": [
+    "popular science",
+    "nonfiction",
+    "physics",
+    "biology"
+   ]
+  },
+  {
+   "id": "the-emperor-of-all-maladies",
+   "title": "The Emperor of All Maladies",
+   "authors": [
+    "Siddhartha Mukherjee"
+   ],
+   "year": 2010,
+   "subjects": [
+    "popular science",
+    "nonfiction",
+    "physics",
+    "biology"
+   ]
+  },
+  {
+   "id": "the-gene",
+   "title": "The Gene",
+   "authors": [
+    "Siddhartha Mukherjee"
+   ],
+   "year": 2016,
+   "subjects": [
+    "popular science",
+    "nonfiction",
+    "physics",
+    "biology"
+   ]
+  },
+  {
+   "id": "thinking-fast-and-slow",
+   "title": "Thinking, Fast and Slow",
+   "authors": [
+    "Daniel Kahneman"
+   ],
+   "year": 2011,
+   "subjects": [
+    "popular science",
+    "nonfiction",
+    "physics",
+    "biology"
+   ]
+  },
+  {
+   "id": "gödel-escher-bach",
+   "title": "Gödel, Escher, Bach",
+   "authors": [
+    "Douglas Hofstadter"
+   ],
+   "year": 1979,
+   "subjects": [
+    "popular science",
+    "nonfiction",
+    "physics",
+    "biology"
+   ]
+  },
+  {
+   "id": "the-structure-of-scientific-revolutions",
+   "title": "The Structure of Scientific Revolutions",
+   "authors": [
+    "Thomas Kuhn"
+   ],
+   "year": 1962,
+   "subjects": [
+    "popular science",
+    "nonfiction",
+    "physics",
+    "biology"
+   ]
+  },
+  {
+   "id": "silent-spring",
+   "title": "Silent Spring",
+   "authors": [
+    "Rachel Carson"
+   ],
+   "year": 1962,
+   "subjects": [
+    "popular science",
+    "nonfiction",
+    "physics",
+    "biology"
+   ]
+  },
+  {
+   "id": "the-immortal-life-of-henrietta-lacks",
+   "title": "The Immortal Life of Henrietta Lacks",
+   "authors": [
+    "Rebecca Skloot"
+   ],
+   "year": 2010,
+   "subjects": [
+    "popular science",
+    "nonfiction",
+    "physics",
+    "biology"
+   ]
+  },
+  {
+   "id": "entangled-life",
+   "title": "Entangled Life",
+   "authors": [
+    "Merlin Sheldrake"
+   ],
+   "year": 2020,
+   "subjects": [
+    "popular science",
+    "nonfiction",
+    "physics",
+    "biology"
+   ]
+  },
+  {
+   "id": "why-we-sleep",
+   "title": "Why We Sleep",
+   "authors": [
+    "Matthew Walker"
+   ],
+   "year": 2017,
+   "subjects": [
+    "popular science",
+    "nonfiction",
+    "physics",
+    "biology"
+   ]
+  },
+  {
+   "id": "the-order-of-time",
+   "title": "The Order of Time",
+   "authors": [
+    "Carlo Rovelli"
+   ],
+   "year": 2017,
+   "subjects": [
+    "popular science",
+    "nonfiction",
+    "physics",
+    "biology"
+   ]
+  },
+  {
+   "id": "seven-brief-lessons-on-physics",
+   "title": "Seven Brief Lessons on Physics",
+   "authors": [
+    "Carlo Rovelli"
+   ],
+   "year": 2014,
+   "subjects": [
+    "popular science",
+    "nonfiction",
+    "physics",
+    "biology"
+   ]
+  },
+  {
+   "id": "meditations",
+   "title": "Meditations",
+   "authors": [
+    "Marcus Aurelius"
+   ],
+   "year": 180,
+   "subjects": [
+    "philosophy",
+    "ethics",
+    "stoicism",
+    "metaphysics"
+   ]
+  },
+  {
+   "id": "letters-from-a-stoic",
+   "title": "Letters from a Stoic",
+   "authors": [
+    "Seneca"
+   ],
+   "year": 65,
+   "subjects": [
+    "philosophy",
+    "ethics",
+    "stoicism",
+    "metaphysics"
+   ]
+  },
+  {
+   "id": "the-republic",
+   "title": "The Republic",
+   "authors": [
+    "Plato"
+   ],
+   "year": -380,
+   "subjects": [
+    "philosophy",
+    "ethics",
+    "stoicism",
+    "metaphysics"
+   ]
+  },
+  {
+   "id": "nicomachean-ethics",
+   "title": "Nicomachean Ethics",
+   "authors": [
+    "Aristotle"
+   ],
+   "year": -340,
+   "subjects": [
+    "philosophy",
+    "ethics",
+    "stoicism",
+    "metaphysics"
+   ]
+  },
+  {
+   "id": "beyond-good-and-evil",
+   "title": "Beyond Good and Evil",
+   "authors": [
+    "Friedrich Nietzsche"
+   ],
+   "year": 1886,
+   "subjects": [
+    "philosophy",
+    "ethics",
+    "stoicism",
+    "metaphysics"
+   ]
+  },
+  {
+   "id": "thus-spoke-zarathustra",
+   "title": "Thus Spoke Zarathustra",
+   "authors": [
+    "Friedrich Nietzsche"
+   ],
+   "year": 1883,
+   "subjects": [
+    "philosophy",
+    "ethics",
+    "stoicism",
+    "metaphysics"
+   ]
+  },
+  {
+   "id": "being-and-time",
+   "title": "Being and Time",
+   "authors": [
+    "Martin Heidegger"
+   ],
+   "year": 1927,
+   "subjects": [
+    "philosophy",
+    "ethics",
+    "stoicism",
+    "metaphysics"
+   ]
+  },
+  {
+   "id": "the-myth-of-sisyphus",
+   "title": "The Myth of Sisyphus",
+   "authors": [
+    "Albert Camus"
+   ],
+   "year": 1942,
+   "subjects": [
+    "philosophy",
+    "ethics",
+    "stoicism",
+    "metaphysics"
+   ]
+  },
+  {
+   "id": "the-stranger",
+   "title": "The Stranger",
+   "authors": [
+    "Albert Camus"
+   ],
+   "year": 1942,
+   "subjects": [
+    "philosophy",
+    "ethics",
+    "stoicism",
+    "metaphysics"
+   ]
+  },
+  {
+   "id": "man-s-search-for-meaning",
+   "title": "Man's Search for Meaning",
+   "authors": [
+    "Viktor Frankl"
+   ],
+   "year": 1946,
+   "subjects": [
+    "philosophy",
+    "ethics",
+    "stoicism",
+    "metaphysics"
+   ]
+  },
+  {
+   "id": "tao-te-ching",
+   "title": "Tao Te Ching",
+   "authors": [
+    "Laozi"
+   ],
+   "year": -400,
+   "subjects": [
+    "philosophy",
+    "ethics",
+    "stoicism",
+    "metaphysics"
+   ]
+  },
+  {
+   "id": "critique-of-pure-reason",
+   "title": "Critique of Pure Reason",
+   "authors": [
+    "Immanuel Kant"
+   ],
+   "year": 1781,
+   "subjects": [
+    "philosophy",
+    "ethics",
+    "stoicism",
+    "metaphysics"
+   ]
+  },
+  {
+   "id": "a-theory-of-justice",
+   "title": "A Theory of Justice",
+   "authors": [
+    "John Rawls"
+   ],
+   "year": 1971,
+   "subjects": [
+    "philosophy",
+    "ethics",
+    "stoicism",
+    "metaphysics"
+   ]
+  },
+  {
+   "id": "the-consolation-of-philosophy",
+   "title": "The Consolation of Philosophy",
+   "authors": [
+    "Boethius"
+   ],
+   "year": 524,
+   "subjects": [
+    "philosophy",
+    "ethics",
+    "stoicism",
+    "metaphysics"
+   ]
+  },
+  {
+   "id": "atomic-habits",
+   "title": "Atomic Habits",
+   "authors": [
+    "James Clear"
+   ],
+   "year": 2018,
+   "subjects": [
+    "business",
+    "self-help",
+    "productivity",
+    "psychology"
+   ]
+  },
+  {
+   "id": "deep-work",
+   "title": "Deep Work",
+   "authors": [
+    "Cal Newport"
+   ],
+   "year": 2016,
+   "subjects": [
+    "business",
+    "self-help",
+    "productivity",
+    "psychology"
+   ]
+  },
+  {
+   "id": "so-good-they-can-t-ignore-you",
+   "title": "So Good They Can't Ignore You",
+   "authors": [
+    "Cal Newport"
+   ],
+   "year": 2012,
+   "subjects": [
+    "business",
+    "self-help",
+    "productivity",
+    "psychology"
+   ]
+  },
+  {
+   "id": "the-lean-startup",
+   "title": "The Lean Startup",
+   "authors": [
+    "Eric Ries"
+   ],
+   "year": 2011,
+   "subjects": [
+    "business",
+    "self-help",
+    "productivity",
+    "psychology"
+   ]
+  },
+  {
+   "id": "zero-to-one",
+   "title": "Zero to One",
+   "authors": [
+    "Peter Thiel"
+   ],
+   "year": 2014,
+   "subjects": [
+    "business",
+    "self-help",
+    "productivity",
+    "psychology"
+   ]
+  },
+  {
+   "id": "good-to-great",
+   "title": "Good to Great",
+   "authors": [
+    "Jim Collins"
+   ],
+   "year": 2001,
+   "subjects": [
+    "business",
+    "self-help",
+    "productivity",
+    "psychology"
+   ]
+  },
+  {
+   "id": "the-hard-thing-about-hard-things",
+   "title": "The Hard Thing About Hard Things",
+   "authors": [
+    "Ben Horowitz"
+   ],
+   "year": 2014,
+   "subjects": [
+    "business",
+    "self-help",
+    "productivity",
+    "psychology"
+   ]
+  },
+  {
+   "id": "never-split-the-difference",
+   "title": "Never Split the Difference",
+   "authors": [
+    "Chris Voss"
+   ],
+   "year": 2016,
+   "subjects": [
+    "business",
+    "self-help",
+    "productivity",
+    "psychology"
+   ]
+  },
+  {
+   "id": "influence",
+   "title": "Influence",
+   "authors": [
+    "Robert Cialdini"
+   ],
+   "year": 1984,
+   "subjects": [
+    "business",
+    "self-help",
+    "productivity",
+    "psychology"
+   ]
+  },
+  {
+   "id": "the-power-of-habit",
+   "title": "The Power of Habit",
+   "authors": [
+    "Charles Duhigg"
+   ],
+   "year": 2012,
+   "subjects": [
+    "business",
+    "self-help",
+    "productivity",
+    "psychology"
+   ]
+  },
+  {
+   "id": "range",
+   "title": "Range",
+   "authors": [
+    "David Epstein"
+   ],
+   "year": 2019,
+   "subjects": [
+    "business",
+    "self-help",
+    "productivity",
+    "psychology"
+   ]
+  },
+  {
+   "id": "outliers",
+   "title": "Outliers",
+   "authors": [
+    "Malcolm Gladwell"
+   ],
+   "year": 2008,
+   "subjects": [
+    "business",
+    "self-help",
+    "productivity",
+    "psychology"
+   ]
+  },
+  {
+   "id": "the-tipping-point",
+   "title": "The Tipping Point",
+   "authors": [
+    "Malcolm Gladwell"
+   ],
+   "year": 2000,
+   "subjects": [
+    "business",
+    "self-help",
+    "productivity",
+    "psychology"
+   ]
+  },
+  {
+   "id": "antifragile",
+   "title": "Antifragile",
+   "authors": [
+    "Nassim Nicholas Taleb"
+   ],
+   "year": 2012,
+   "subjects": [
+    "business",
+    "self-help",
+    "productivity",
+    "psychology"
+   ]
+  },
+  {
+   "id": "the-black-swan",
+   "title": "The Black Swan",
+   "authors": [
+    "Nassim Nicholas Taleb"
+   ],
+   "year": 2007,
+   "subjects": [
+    "business",
+    "self-help",
+    "productivity",
+    "psychology"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "src": "2001-a-space-odyssey",
+   "similar": [
+    "frankenstein",
+    "annihilation"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "2001-a-space-odyssey",
+   "similar": [
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "2001-a-space-odyssey",
+   "similar": [
+    "the-left-hand-of-darkness",
+    "childhood-s-end",
+    "the-dispossessed",
+    "rendezvous-with-rama",
+    "anathem",
+    "foundation-and-empire"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "a-brief-history-of-time",
+   "similar": [
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "a-brief-history-of-time",
+   "similar": [
+    "cosmos",
+    "seven-brief-lessons-on-physics",
+    "the-demon-haunted-world",
+    "the-order-of-time",
+    "entangled-life"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "a-clash-of-kings",
+   "similar": [
+    "a-storm-of-swords",
+    "a-game-of-thrones",
+    "the-name-of-the-wind",
+    "the-silmarillion",
+    "the-hobbit"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "a-fine-balance",
+   "similar": [
+    "the-stranger"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "a-fine-balance",
+   "similar": [
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "a-fine-balance",
+   "similar": [
+    "lincoln-in-the-bardo",
+    "never-let-me-go",
+    "gilead",
+    "the-remains-of-the-day",
+    "war-and-peace",
+    "jane-eyre"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "a-fire-upon-the-deep",
+   "similar": [
+    "a-wizard-of-earthsea"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "a-fire-upon-the-deep",
+   "similar": [
+    "atomic-habits"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "a-fire-upon-the-deep",
+   "similar": [
+    "the-quantum-thief",
+    "anathem",
+    "revelation-space",
+    "cryptonomicon",
+    "the-martian",
+    "the-dispossessed"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "a-game-of-thrones",
+   "similar": [
+    "a-clash-of-kings",
+    "the-silmarillion",
+    "a-storm-of-swords",
+    "the-return-of-the-king",
+    "assassin-s-apprentice",
+    "mistborn"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "a-memory-called-empire",
+   "similar": [
+    "project-hail-mary",
+    "ancillary-justice",
+    "the-martian",
+    "death-s-end",
+    "house-of-suns"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "a-rogue-of-one-s-own",
+   "similar": [
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "a-rogue-of-one-s-own",
+   "similar": [
+    "bringing-down-the-duke",
+    "devil-in-winter",
+    "the-duchess-deal",
+    "romancing-mister-bridgerton",
+    "emma"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "a-storm-of-swords",
+   "similar": [
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "a-storm-of-swords",
+   "similar": [
+    "the-name-of-the-wind",
+    "a-clash-of-kings",
+    "the-wise-man-s-fear",
+    "a-game-of-thrones"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "a-study-in-scarlet",
+   "similar": [
+    "atomic-habits"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "a-study-in-scarlet",
+   "similar": [
+    "the-adventures-of-sherlock-holmes",
+    "the-hound-of-the-baskervilles",
+    "murder-on-the-orient-express",
+    "the-thursday-murder-club",
+    "the-maltese-falcon"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "a-theory-of-justice",
+   "similar": [
+    "sapiens"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "a-theory-of-justice",
+   "similar": [
+    "atomic-habits"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "a-theory-of-justice",
+   "similar": [
+    "the-consolation-of-philosophy",
+    "critique-of-pure-reason",
+    "meditations",
+    "tao-te-ching",
+    "nicomachean-ethics"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "a-wizard-of-earthsea",
+   "similar": [
+    "a-fire-upon-the-deep",
+    "children-of-dune",
+    "roadside-picnic",
+    "project-hail-mary"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "a-wizard-of-earthsea",
+   "similar": [
+    "the-tombs-of-atuan",
+    "the-lies-of-locke-lamora",
+    "assassin-s-apprentice",
+    "the-blade-itself",
+    "the-left-hand-of-darkness",
+    "the-dispossessed"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "anathem",
+   "similar": [
+    "gödel-escher-bach"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "anathem",
+   "similar": [
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "anathem",
+   "similar": [
+    "a-fire-upon-the-deep",
+    "cryptonomicon",
+    "the-quantum-thief",
+    "snow-crash",
+    "the-stars-my-destination",
+    "a-memory-called-empire"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "ancillary-justice",
+   "similar": [
+    "annihilation"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "ancillary-justice",
+   "similar": [
+    "atomic-habits"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "ancillary-justice",
+   "similar": [
+    "a-memory-called-empire",
+    "death-s-end",
+    "project-hail-mary",
+    "the-dark-forest",
+    "house-of-suns",
+    "rendezvous-with-rama"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "and-then-there-were-none",
+   "similar": [
+    "the-murder-of-roger-ackroyd",
+    "murder-on-the-orient-express",
+    "the-big-sleep",
+    "the-adventures-of-sherlock-holmes",
+    "gone-girl",
+    "the-thursday-murder-club"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "anna-karenina",
+   "similar": [
+    "pride-and-prejudice",
+    "jonathan-strange-mr-norrell"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "anna-karenina",
+   "similar": [
+    "atomic-habits"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "anna-karenina",
+   "similar": [
+    "war-and-peace",
+    "middlemarch",
+    "crime-and-punishment",
+    "stoner",
+    "the-great-gatsby"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "annihilation",
+   "similar": [
+    "snow-crash",
+    "ancillary-justice",
+    "the-dispossessed",
+    "2001-a-space-odyssey",
+    "the-silence-of-the-lambs"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "annihilation",
+   "similar": [
+    "the-fisherman",
+    "at-the-mountains-of-madness",
+    "mexican-gothic",
+    "we-have-always-lived-in-the-castle",
+    "dracula",
+    "frankenstein"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "antifragile",
+   "similar": [
+    "meditations"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "antifragile",
+   "similar": [
+    "the-black-swan",
+    "the-tipping-point",
+    "atomic-habits",
+    "outliers",
+    "the-lean-startup"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "assassin-s-apprentice",
+   "similar": [
+    "the-fifth-season",
+    "the-tombs-of-atuan",
+    "the-obelisk-gate",
+    "a-wizard-of-earthsea",
+    "the-name-of-the-wind",
+    "the-curse-of-chalion"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "at-the-mountains-of-madness",
+   "similar": [
+    "northanger-abbey",
+    "piranesi"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "at-the-mountains-of-madness",
+   "similar": [
+    "annihilation",
+    "we-have-always-lived-in-the-castle",
+    "the-fisherman",
+    "the-haunting-of-hill-house",
+    "the-only-good-indians",
+    "mexican-gothic"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "atomic-habits",
+   "similar": [
+    "meditations",
+    "a-fire-upon-the-deep",
+    "ancillary-justice",
+    "cryptonomicon",
+    "revelation-space",
+    "foundation",
+    "the-left-hand-of-darkness",
+    "the-curse-of-chalion",
+    "the-way-of-kings",
+    "the-wise-man-s-fear",
+    "the-hobbit",
+    "the-tombs-of-atuan",
+    "the-return-of-the-king",
+    "song-of-solomon",
+    "wuthering-heights",
+    "the-great-gatsby",
+    "anna-karenina",
+    "war-and-peace",
+    "bleak-house",
+    "venetia",
+    "northanger-abbey",
+    "frederica",
+    "the-duke-and-i",
+    "devil-in-winter",
+    "the-duchess-deal",
+    "the-secret-history",
+    "the-no-1-ladies-detective-agency",
+    "a-study-in-scarlet",
+    "snow-falling-on-cedars",
+    "gone-girl",
+    "the-maltese-falcon",
+    "mexican-gothic",
+    "pet-sematary",
+    "house-of-leaves",
+    "tender-is-the-flesh",
+    "it",
+    "frankenstein",
+    "cosmos",
+    "gödel-escher-bach",
+    "the-emperor-of-all-maladies",
+    "the-order-of-time",
+    "silent-spring",
+    "the-gene",
+    "tao-te-ching",
+    "being-and-time",
+    "letters-from-a-stoic",
+    "the-myth-of-sisyphus",
+    "nicomachean-ethics",
+    "a-theory-of-justice"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "atomic-habits",
+   "similar": [
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "atomic-habits",
+   "similar": [
+    "deep-work",
+    "the-black-swan",
+    "so-good-they-can-t-ignore-you",
+    "antifragile",
+    "the-hard-thing-about-hard-things",
+    "the-tipping-point"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "being-and-time",
+   "similar": [
+    "atomic-habits",
+    "sapiens",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "being-and-time",
+   "similar": [
+    "the-myth-of-sisyphus",
+    "thus-spoke-zarathustra",
+    "the-stranger",
+    "beyond-good-and-evil"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "beloved",
+   "similar": [
+    "the-left-hand-of-darkness",
+    "persuasion",
+    "jonathan-strange-mr-norrell"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "beloved",
+   "similar": [
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "beloved",
+   "similar": [
+    "song-of-solomon",
+    "the-great-gatsby",
+    "one-hundred-years-of-solitude",
+    "to-the-lighthouse",
+    "jane-eyre"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "beyond-good-and-evil",
+   "similar": [
+    "thus-spoke-zarathustra",
+    "nicomachean-ethics",
+    "being-and-time",
+    "the-republic",
+    "tao-te-ching"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "bleak-house",
+   "similar": [
+    "persuasion",
+    "pride-and-prejudice"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "bleak-house",
+   "similar": [
+    "atomic-habits",
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "bleak-house",
+   "similar": [
+    "jane-eyre",
+    "great-expectations",
+    "wuthering-heights",
+    "madame-bovary",
+    "a-fine-balance",
+    "war-and-peace"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "blindsight",
+   "similar": [
+    "sapiens",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "blindsight",
+   "similar": [
+    "rendezvous-with-rama",
+    "the-fall-of-hyperion",
+    "childhood-s-end",
+    "hyperion",
+    "a-memory-called-empire",
+    "project-hail-mary"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "bringing-down-the-duke",
+   "similar": [
+    "the-duchess-deal",
+    "a-rogue-of-one-s-own",
+    "pride-and-prejudice",
+    "devil-in-winter",
+    "frederica",
+    "persuasion"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "childhood-s-end",
+   "similar": [
+    "2001-a-space-odyssey",
+    "rendezvous-with-rama",
+    "the-left-hand-of-darkness",
+    "blindsight",
+    "solaris",
+    "the-quantum-thief"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "children-of-dune",
+   "similar": [
+    "a-wizard-of-earthsea"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "children-of-dune",
+   "similar": [
+    "foundation",
+    "dune-messiah",
+    "foundation-and-empire",
+    "dune",
+    "ubik"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "cosmos",
+   "similar": [
+    "atomic-habits",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "cosmos",
+   "similar": [
+    "the-demon-haunted-world",
+    "a-brief-history-of-time",
+    "the-selfish-gene",
+    "seven-brief-lessons-on-physics",
+    "the-gene"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "crime-and-punishment",
+   "similar": [
+    "the-brothers-karamazov",
+    "war-and-peace",
+    "madame-bovary",
+    "anna-karenina",
+    "jane-eyre",
+    "lincoln-in-the-bardo"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "critique-of-pure-reason",
+   "similar": [
+    "a-theory-of-justice",
+    "tao-te-ching",
+    "the-consolation-of-philosophy",
+    "man-s-search-for-meaning",
+    "the-republic"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "cryptonomicon",
+   "similar": [
+    "never-let-me-go"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "cryptonomicon",
+   "similar": [
+    "atomic-habits",
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "cryptonomicon",
+   "similar": [
+    "anathem",
+    "snow-crash",
+    "a-fire-upon-the-deep",
+    "neuromancer",
+    "foundation",
+    "foundation-and-empire"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "death-s-end",
+   "similar": [
+    "ancillary-justice",
+    "the-dark-forest",
+    "a-memory-called-empire",
+    "the-three-body-problem",
+    "neuromancer",
+    "2001-a-space-odyssey"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "deep-work",
+   "similar": [
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "deep-work",
+   "similar": [
+    "so-good-they-can-t-ignore-you",
+    "atomic-habits",
+    "the-lean-startup",
+    "the-black-swan",
+    "the-tipping-point"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "devil-in-winter",
+   "similar": [
+    "atomic-habits",
+    "sapiens",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "devil-in-winter",
+   "similar": [
+    "a-rogue-of-one-s-own",
+    "romancing-mister-bridgerton",
+    "bringing-down-the-duke",
+    "the-duke-and-i",
+    "mansfield-park",
+    "the-duchess-deal"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "do-androids-dream-of-electric-sheep",
+   "similar": [
+    "dune",
+    "ubik",
+    "dune-messiah",
+    "the-stars-my-destination",
+    "project-hail-mary",
+    "the-left-hand-of-darkness"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "dracula",
+   "similar": [
+    "northanger-abbey"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "dracula",
+   "similar": [
+    "frankenstein",
+    "pet-sematary",
+    "the-haunting-of-hill-house",
+    "it",
+    "annihilation"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "dune",
+   "similar": [
+    "dune-messiah",
+    "do-androids-dream-of-electric-sheep",
+    "children-of-dune",
+    "ubik",
+    "the-dispossessed",
+    "foundation-and-empire"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "dune-messiah",
+   "similar": [
+    "children-of-dune",
+    "dune",
+    "foundation",
+    "do-androids-dream-of-electric-sheep",
+    "blindsight",
+    "rendezvous-with-rama"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "emma",
+   "similar": [
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "emma",
+   "similar": [
+    "sense-and-sensibility",
+    "pride-and-prejudice",
+    "persuasion",
+    "the-duchess-deal",
+    "a-rogue-of-one-s-own",
+    "mansfield-park",
+    "northanger-abbey"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "entangled-life",
+   "similar": [
+    "why-we-sleep",
+    "the-immortal-life-of-henrietta-lacks",
+    "the-order-of-time",
+    "silent-spring",
+    "thinking-fast-and-slow"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "foundation",
+   "similar": [
+    "atomic-habits"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "foundation",
+   "similar": [
+    "foundation-and-empire",
+    "children-of-dune",
+    "second-foundation",
+    "dune-messiah",
+    "blindsight",
+    "hyperion",
+    "i-robot"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "foundation-and-empire",
+   "similar": [
+    "frankenstein"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "foundation-and-empire",
+   "similar": [
+    "second-foundation",
+    "foundation",
+    "i-robot",
+    "children-of-dune",
+    "the-martian"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "frankenstein",
+   "similar": [
+    "rendezvous-with-rama",
+    "foundation-and-empire",
+    "solaris",
+    "2001-a-space-odyssey",
+    "the-silence-of-the-lambs"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "frankenstein",
+   "similar": [
+    "atomic-habits"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "frankenstein",
+   "similar": [
+    "the-haunting-of-hill-house",
+    "dracula",
+    "we-have-always-lived-in-the-castle",
+    "pet-sematary",
+    "the-fisherman",
+    "it"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "frederica",
+   "similar": [
+    "atomic-habits",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "frederica",
+   "similar": [
+    "venetia",
+    "the-grand-sophy",
+    "the-duke-and-i",
+    "northanger-abbey",
+    "the-duchess-deal",
+    "romancing-mister-bridgerton"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "gilead",
+   "similar": [
+    "the-stranger"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "gilead",
+   "similar": [
+    "stoner",
+    "lincoln-in-the-bardo",
+    "middlemarch",
+    "a-fine-balance",
+    "great-expectations",
+    "madame-bovary"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "gone-girl",
+   "similar": [
+    "atomic-habits"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "gone-girl",
+   "similar": [
+    "sharp-objects",
+    "the-girl-with-the-dragon-tattoo",
+    "the-silence-of-the-lambs",
+    "the-maltese-falcon",
+    "in-the-woods"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "good-to-great",
+   "similar": [
+    "sapiens",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "good-to-great",
+   "similar": [
+    "the-hard-thing-about-hard-things",
+    "zero-to-one",
+    "never-split-the-difference",
+    "the-lean-startup",
+    "influence",
+    "so-good-they-can-t-ignore-you"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "great-expectations",
+   "similar": [
+    "bleak-house",
+    "madame-bovary",
+    "jane-eyre",
+    "the-brothers-karamazov",
+    "the-great-gatsby"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "guns-germs-and-steel",
+   "similar": [
+    "sapiens",
+    "the-selfish-gene",
+    "homo-deus",
+    "the-demon-haunted-world",
+    "the-immortal-life-of-henrietta-lacks"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "gödel-escher-bach",
+   "similar": [
+    "anathem",
+    "revelation-space",
+    "the-dark-forest",
+    "neuromancer"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "gödel-escher-bach",
+   "similar": [
+    "atomic-habits"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "gödel-escher-bach",
+   "similar": [
+    "the-structure-of-scientific-revolutions",
+    "thinking-fast-and-slow",
+    "silent-spring",
+    "the-gene",
+    "a-brief-history-of-time"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "homo-deus",
+   "similar": [
+    "the-emperor-of-all-maladies",
+    "sapiens",
+    "the-gene",
+    "guns-germs-and-steel"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "house-of-leaves",
+   "similar": [
+    "piranesi"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "house-of-leaves",
+   "similar": [
+    "atomic-habits",
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "house-of-leaves",
+   "similar": [
+    "the-only-good-indians",
+    "mexican-gothic",
+    "tender-is-the-flesh",
+    "the-fisherman"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "house-of-suns",
+   "similar": [
+    "never-let-me-go"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "house-of-suns",
+   "similar": [
+    "the-three-body-problem",
+    "revelation-space",
+    "the-dark-forest",
+    "the-quantum-thief",
+    "ubik"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "hyperion",
+   "similar": [
+    "the-fall-of-hyperion",
+    "i-robot",
+    "blindsight",
+    "second-foundation",
+    "foundation",
+    "house-of-suns"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "i-robot",
+   "similar": [
+    "hyperion",
+    "second-foundation",
+    "the-fall-of-hyperion",
+    "foundation-and-empire",
+    "revelation-space",
+    "foundation"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "in-the-woods",
+   "similar": [
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "in-the-woods",
+   "similar": [
+    "the-secret-history",
+    "the-silence-of-the-lambs",
+    "mystic-river",
+    "sharp-objects",
+    "the-maltese-falcon",
+    "the-thursday-murder-club"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "influence",
+   "similar": [
+    "man-s-search-for-meaning"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "influence",
+   "similar": [
+    "the-power-of-habit",
+    "never-split-the-difference",
+    "range",
+    "the-hard-thing-about-hard-things",
+    "zero-to-one"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "it",
+   "similar": [
+    "atomic-habits",
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "it",
+   "similar": [
+    "pet-sematary",
+    "the-shining",
+    "dracula",
+    "tender-is-the-flesh"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "jane-eyre",
+   "similar": [
+    "the-stranger",
+    "pride-and-prejudice",
+    "mexican-gothic"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "jane-eyre",
+   "similar": [
+    "wuthering-heights",
+    "bleak-house",
+    "mrs-dalloway",
+    "great-expectations",
+    "gilead",
+    "things-fall-apart"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "jonathan-strange-mr-norrell",
+   "similar": [
+    "anna-karenina",
+    "lincoln-in-the-bardo",
+    "wuthering-heights",
+    "beloved"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "jonathan-strange-mr-norrell",
+   "similar": [
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "jonathan-strange-mr-norrell",
+   "similar": [
+    "the-priory-of-the-orange-tree",
+    "the-obelisk-gate",
+    "piranesi",
+    "the-fifth-season",
+    "the-name-of-the-wind"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "letters-from-a-stoic",
+   "similar": [
+    "atomic-habits",
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "letters-from-a-stoic",
+   "similar": [
+    "the-republic",
+    "meditations",
+    "nicomachean-ethics",
+    "the-consolation-of-philosophy",
+    "critique-of-pure-reason"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "lincoln-in-the-bardo",
+   "similar": [
+    "jonathan-strange-mr-norrell"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "lincoln-in-the-bardo",
+   "similar": [
+    "gilead",
+    "a-fine-balance",
+    "stoner",
+    "never-let-me-go",
+    "song-of-solomon",
+    "the-remains-of-the-day"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "love-in-the-time-of-cholera",
+   "similar": [
+    "things-fall-apart",
+    "one-hundred-years-of-solitude",
+    "the-remains-of-the-day",
+    "song-of-solomon",
+    "never-let-me-go"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "madame-bovary",
+   "similar": [
+    "mexican-gothic"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "madame-bovary",
+   "similar": [
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "madame-bovary",
+   "similar": [
+    "great-expectations",
+    "the-brothers-karamazov",
+    "bleak-house",
+    "crime-and-punishment",
+    "things-fall-apart"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "man-s-search-for-meaning",
+   "similar": [
+    "sapiens",
+    "the-power-of-habit",
+    "influence",
+    "the-tipping-point",
+    "so-good-they-can-t-ignore-you"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "man-s-search-for-meaning",
+   "similar": [
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "man-s-search-for-meaning",
+   "similar": [
+    "tao-te-ching",
+    "the-stranger",
+    "critique-of-pure-reason",
+    "the-myth-of-sisyphus",
+    "nicomachean-ethics",
+    "the-consolation-of-philosophy"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "mansfield-park",
+   "similar": [
+    "northanger-abbey",
+    "persuasion",
+    "the-grand-sophy",
+    "sense-and-sensibility",
+    "the-duke-and-i",
+    "pride-and-prejudice",
+    "emma"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "meditations",
+   "similar": [
+    "the-hard-thing-about-hard-things",
+    "the-power-of-habit",
+    "atomic-habits",
+    "antifragile",
+    "the-dispossessed"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "meditations",
+   "similar": [
+    "sapiens",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "meditations",
+   "similar": [
+    "letters-from-a-stoic",
+    "the-consolation-of-philosophy",
+    "the-republic",
+    "a-theory-of-justice"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "mexican-gothic",
+   "similar": [
+    "wuthering-heights",
+    "jane-eyre",
+    "madame-bovary",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "mexican-gothic",
+   "similar": [
+    "atomic-habits",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "mexican-gothic",
+   "similar": [
+    "house-of-leaves",
+    "the-fisherman",
+    "the-only-good-indians",
+    "annihilation",
+    "pet-sematary",
+    "the-haunting-of-hill-house"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "middlemarch",
+   "similar": [
+    "the-left-hand-of-darkness"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "middlemarch",
+   "similar": [
+    "anna-karenina",
+    "stoner",
+    "war-and-peace",
+    "gilead",
+    "beloved"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "mistborn",
+   "similar": [
+    "the-blade-itself",
+    "words-of-radiance",
+    "the-lies-of-locke-lamora",
+    "the-way-of-kings",
+    "piranesi",
+    "the-name-of-the-wind"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "mrs-dalloway",
+   "similar": [
+    "to-the-lighthouse",
+    "wuthering-heights",
+    "the-great-gatsby",
+    "jane-eyre",
+    "love-in-the-time-of-cholera"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "murder-on-the-orient-express",
+   "similar": [
+    "and-then-there-were-none",
+    "the-adventures-of-sherlock-holmes",
+    "the-murder-of-roger-ackroyd",
+    "a-study-in-scarlet",
+    "the-maltese-falcon",
+    "the-hound-of-the-baskervilles"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "mystic-river",
+   "similar": [
+    "sapiens",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "mystic-river",
+   "similar": [
+    "the-no-1-ladies-detective-agency",
+    "the-secret-history",
+    "snow-falling-on-cedars",
+    "in-the-woods",
+    "the-thursday-murder-club"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "neuromancer",
+   "similar": [
+    "gödel-escher-bach"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "neuromancer",
+   "similar": [
+    "snow-crash",
+    "the-dispossessed",
+    "cryptonomicon",
+    "the-left-hand-of-darkness",
+    "rendezvous-with-rama",
+    "i-robot"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "never-let-me-go",
+   "similar": [
+    "cryptonomicon",
+    "house-of-suns",
+    "rendezvous-with-rama",
+    "the-dark-forest"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "never-let-me-go",
+   "similar": [
+    "a-fine-balance",
+    "the-remains-of-the-day",
+    "lincoln-in-the-bardo",
+    "things-fall-apart",
+    "war-and-peace"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "never-split-the-difference",
+   "similar": [
+    "sapiens",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "never-split-the-difference",
+   "similar": [
+    "influence",
+    "the-hard-thing-about-hard-things",
+    "the-power-of-habit",
+    "good-to-great",
+    "the-lean-startup"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "nicomachean-ethics",
+   "similar": [
+    "the-dispossessed"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "nicomachean-ethics",
+   "similar": [
+    "atomic-habits"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "nicomachean-ethics",
+   "similar": [
+    "beyond-good-and-evil",
+    "the-republic",
+    "thus-spoke-zarathustra",
+    "letters-from-a-stoic",
+    "man-s-search-for-meaning",
+    "the-stranger"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "northanger-abbey",
+   "similar": [
+    "dracula",
+    "we-have-always-lived-in-the-castle",
+    "the-fisherman",
+    "at-the-mountains-of-madness"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "northanger-abbey",
+   "similar": [
+    "atomic-habits"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "northanger-abbey",
+   "similar": [
+    "the-grand-sophy",
+    "mansfield-park",
+    "frederica",
+    "persuasion",
+    "a-rogue-of-one-s-own",
+    "bringing-down-the-duke",
+    "pride-and-prejudice",
+    "emma",
+    "sense-and-sensibility"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "one-hundred-years-of-solitude",
+   "similar": [
+    "the-left-hand-of-darkness",
+    "persuasion"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "one-hundred-years-of-solitude",
+   "similar": [
+    "love-in-the-time-of-cholera",
+    "song-of-solomon",
+    "things-fall-apart",
+    "beloved",
+    "never-let-me-go"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "outliers",
+   "similar": [
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "outliers",
+   "similar": [
+    "the-tipping-point",
+    "range",
+    "antifragile",
+    "the-power-of-habit",
+    "good-to-great",
+    "the-black-swan"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "persuasion",
+   "similar": [
+    "beloved",
+    "things-fall-apart",
+    "one-hundred-years-of-solitude",
+    "bleak-house"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "persuasion",
+   "similar": [
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "persuasion",
+   "similar": [
+    "mansfield-park",
+    "sense-and-sensibility",
+    "northanger-abbey",
+    "emma",
+    "frederica",
+    "the-duke-and-i",
+    "pride-and-prejudice"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "pet-sematary",
+   "similar": [
+    "atomic-habits",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "pet-sematary",
+   "similar": [
+    "dracula",
+    "it",
+    "frankenstein",
+    "the-shining",
+    "annihilation",
+    "we-have-always-lived-in-the-castle"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "piranesi",
+   "similar": [
+    "house-of-leaves",
+    "at-the-mountains-of-madness",
+    "the-haunting-of-hill-house",
+    "we-have-always-lived-in-the-castle"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "piranesi",
+   "similar": [
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "piranesi",
+   "similar": [
+    "the-curse-of-chalion",
+    "the-priory-of-the-orange-tree",
+    "the-hobbit",
+    "jonathan-strange-mr-norrell"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "pride-and-prejudice",
+   "similar": [
+    "stoner",
+    "anna-karenina",
+    "jane-eyre",
+    "bleak-house"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "pride-and-prejudice",
+   "similar": [
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "pride-and-prejudice",
+   "similar": [
+    "emma",
+    "the-duchess-deal",
+    "sense-and-sensibility",
+    "bringing-down-the-duke",
+    "mansfield-park",
+    "persuasion",
+    "northanger-abbey"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "project-hail-mary",
+   "similar": [
+    "a-wizard-of-earthsea"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "project-hail-mary",
+   "similar": [
+    "the-martian",
+    "a-memory-called-empire",
+    "solaris",
+    "ancillary-justice",
+    "roadside-picnic",
+    "i-robot"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "range",
+   "similar": [
+    "outliers",
+    "the-power-of-habit",
+    "the-tipping-point",
+    "influence",
+    "the-black-swan",
+    "never-split-the-difference"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "rendezvous-with-rama",
+   "similar": [
+    "never-let-me-go",
+    "frankenstein"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "rendezvous-with-rama",
+   "similar": [
+    "childhood-s-end",
+    "blindsight",
+    "2001-a-space-odyssey",
+    "the-fall-of-hyperion",
+    "a-fire-upon-the-deep"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "revelation-space",
+   "similar": [
+    "gödel-escher-bach"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "revelation-space",
+   "similar": [
+    "atomic-habits"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "revelation-space",
+   "similar": [
+    "house-of-suns",
+    "the-quantum-thief",
+    "the-three-body-problem",
+    "a-fire-upon-the-deep",
+    "dune"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "roadside-picnic",
+   "similar": [
+    "a-wizard-of-earthsea"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "roadside-picnic",
+   "similar": [
+    "the-stars-my-destination",
+    "solaris",
+    "ubik",
+    "the-martian",
+    "do-androids-dream-of-electric-sheep"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "romancing-mister-bridgerton",
+   "similar": [
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "romancing-mister-bridgerton",
+   "similar": [
+    "devil-in-winter",
+    "the-duke-and-i",
+    "a-rogue-of-one-s-own",
+    "venetia"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "sapiens",
+   "similar": [
+    "man-s-search-for-meaning",
+    "the-consolation-of-philosophy",
+    "a-theory-of-justice",
+    "tao-te-ching",
+    "blindsight",
+    "anathem",
+    "the-three-body-problem",
+    "the-dispossessed",
+    "solaris",
+    "cryptonomicon",
+    "the-wise-man-s-fear",
+    "the-blade-itself",
+    "the-curse-of-chalion",
+    "the-priory-of-the-orange-tree",
+    "the-return-of-the-king",
+    "the-silmarillion",
+    "the-remains-of-the-day",
+    "madame-bovary",
+    "things-fall-apart",
+    "bleak-house",
+    "a-fine-balance",
+    "beloved",
+    "pride-and-prejudice",
+    "a-rogue-of-one-s-own",
+    "venetia",
+    "devil-in-winter",
+    "the-duchess-deal",
+    "emma",
+    "in-the-woods",
+    "the-murder-of-roger-ackroyd",
+    "the-girl-with-the-dragon-tattoo",
+    "the-adventures-of-sherlock-holmes",
+    "the-maltese-falcon",
+    "mystic-river",
+    "the-haunting-of-hill-house",
+    "house-of-leaves",
+    "the-only-good-indians",
+    "the-shining",
+    "it",
+    "we-have-always-lived-in-the-castle",
+    "meditations",
+    "the-myth-of-sisyphus",
+    "letters-from-a-stoic",
+    "the-republic",
+    "being-and-time",
+    "the-tipping-point",
+    "outliers",
+    "good-to-great",
+    "never-split-the-difference",
+    "the-hard-thing-about-hard-things",
+    "the-lean-startup"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "sapiens",
+   "similar": [
+    "homo-deus",
+    "guns-germs-and-steel",
+    "the-emperor-of-all-maladies",
+    "the-selfish-gene",
+    "seven-brief-lessons-on-physics",
+    "a-brief-history-of-time"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "second-foundation",
+   "similar": [
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "second-foundation",
+   "similar": [
+    "i-robot",
+    "foundation-and-empire",
+    "hyperion",
+    "foundation",
+    "ubik"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "sense-and-sensibility",
+   "similar": [
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "sense-and-sensibility",
+   "similar": [
+    "persuasion",
+    "emma",
+    "mansfield-park",
+    "pride-and-prejudice",
+    "the-duke-and-i",
+    "northanger-abbey"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "seven-brief-lessons-on-physics",
+   "similar": [
+    "a-brief-history-of-time",
+    "the-order-of-time",
+    "cosmos",
+    "why-we-sleep",
+    "gödel-escher-bach",
+    "the-structure-of-scientific-revolutions"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "sharp-objects",
+   "similar": [
+    "the-silence-of-the-lambs",
+    "gone-girl",
+    "in-the-woods",
+    "the-girl-with-the-dragon-tattoo",
+    "the-hound-of-the-baskervilles"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "silent-spring",
+   "similar": [
+    "atomic-habits"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "silent-spring",
+   "similar": [
+    "the-immortal-life-of-henrietta-lacks",
+    "the-structure-of-scientific-revolutions",
+    "entangled-life",
+    "gödel-escher-bach",
+    "the-selfish-gene",
+    "sapiens"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "snow-crash",
+   "similar": [
+    "annihilation"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "snow-crash",
+   "similar": [
+    "cryptonomicon",
+    "neuromancer",
+    "anathem",
+    "the-dispossessed",
+    "ancillary-justice",
+    "the-martian"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "snow-falling-on-cedars",
+   "similar": [
+    "atomic-habits"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "snow-falling-on-cedars",
+   "similar": [
+    "the-thursday-murder-club",
+    "the-no-1-ladies-detective-agency",
+    "the-hound-of-the-baskervilles",
+    "mystic-river",
+    "the-adventures-of-sherlock-holmes"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "so-good-they-can-t-ignore-you",
+   "similar": [
+    "thinking-fast-and-slow",
+    "man-s-search-for-meaning"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "so-good-they-can-t-ignore-you",
+   "similar": [
+    "the-lean-startup",
+    "deep-work",
+    "zero-to-one",
+    "atomic-habits"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "solaris",
+   "similar": [
+    "frankenstein"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "solaris",
+   "similar": [
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "solaris",
+   "similar": [
+    "roadside-picnic",
+    "the-martian",
+    "the-stars-my-destination",
+    "project-hail-mary",
+    "neuromancer"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "song-of-solomon",
+   "similar": [
+    "atomic-habits"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "song-of-solomon",
+   "similar": [
+    "one-hundred-years-of-solitude",
+    "beloved",
+    "love-in-the-time-of-cholera",
+    "the-great-gatsby"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "stoner",
+   "similar": [
+    "pride-and-prejudice",
+    "the-secret-history"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "stoner",
+   "similar": [
+    "middlemarch",
+    "gilead",
+    "anna-karenina",
+    "lincoln-in-the-bardo",
+    "beloved"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "tao-te-ching",
+   "similar": [
+    "sapiens"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "tao-te-ching",
+   "similar": [
+    "atomic-habits"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "tao-te-ching",
+   "similar": [
+    "critique-of-pure-reason",
+    "man-s-search-for-meaning",
+    "a-theory-of-justice",
+    "the-stranger",
+    "beyond-good-and-evil",
+    "letters-from-a-stoic"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "tender-is-the-flesh",
+   "similar": [
+    "atomic-habits"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "tender-is-the-flesh",
+   "similar": [
+    "the-shining",
+    "the-only-good-indians",
+    "it",
+    "house-of-leaves",
+    "pet-sematary"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-adventures-of-sherlock-holmes",
+   "similar": [
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-adventures-of-sherlock-holmes",
+   "similar": [
+    "murder-on-the-orient-express",
+    "a-study-in-scarlet",
+    "and-then-there-were-none",
+    "the-hound-of-the-baskervilles",
+    "the-maltese-falcon",
+    "the-silence-of-the-lambs"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-big-sleep",
+   "similar": [
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-big-sleep",
+   "similar": [
+    "the-maltese-falcon",
+    "the-murder-of-roger-ackroyd",
+    "the-girl-with-the-dragon-tattoo",
+    "and-then-there-were-none",
+    "a-study-in-scarlet"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-black-swan",
+   "similar": [
+    "atomic-habits",
+    "antifragile",
+    "deep-work",
+    "the-tipping-point",
+    "never-split-the-difference"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-blade-itself",
+   "similar": [
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-blade-itself",
+   "similar": [
+    "the-lies-of-locke-lamora",
+    "mistborn",
+    "a-wizard-of-earthsea",
+    "words-of-radiance",
+    "the-name-of-the-wind",
+    "the-two-towers"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-brothers-karamazov",
+   "similar": [
+    "the-secret-history"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "the-brothers-karamazov",
+   "similar": [
+    "madame-bovary",
+    "crime-and-punishment",
+    "great-expectations",
+    "war-and-peace"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-consolation-of-philosophy",
+   "similar": [
+    "sapiens",
+    "the-dispossessed"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "the-consolation-of-philosophy",
+   "similar": [
+    "sapiens",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-consolation-of-philosophy",
+   "similar": [
+    "meditations",
+    "a-theory-of-justice",
+    "letters-from-a-stoic",
+    "critique-of-pure-reason",
+    "tao-te-ching",
+    "the-stranger"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-curse-of-chalion",
+   "similar": [
+    "atomic-habits",
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-curse-of-chalion",
+   "similar": [
+    "the-hobbit",
+    "piranesi",
+    "the-fellowship-of-the-ring",
+    "the-priory-of-the-orange-tree",
+    "the-blade-itself",
+    "the-tombs-of-atuan"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-dark-forest",
+   "similar": [
+    "never-let-me-go",
+    "gödel-escher-bach"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "the-dark-forest",
+   "similar": [
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-dark-forest",
+   "similar": [
+    "death-s-end",
+    "the-three-body-problem",
+    "ancillary-justice",
+    "house-of-suns",
+    "blindsight",
+    "i-robot"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-demon-haunted-world",
+   "similar": [
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-demon-haunted-world",
+   "similar": [
+    "the-selfish-gene",
+    "cosmos",
+    "guns-germs-and-steel",
+    "a-brief-history-of-time",
+    "the-structure-of-scientific-revolutions"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-dispossessed",
+   "similar": [
+    "annihilation",
+    "nicomachean-ethics",
+    "meditations",
+    "the-myth-of-sisyphus",
+    "the-consolation-of-philosophy"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "the-dispossessed",
+   "similar": [
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-dispossessed",
+   "similar": [
+    "neuromancer",
+    "the-left-hand-of-darkness",
+    "snow-crash",
+    "2001-a-space-odyssey",
+    "the-fall-of-hyperion",
+    "a-wizard-of-earthsea",
+    "the-tombs-of-atuan"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-duchess-deal",
+   "similar": [
+    "atomic-habits",
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-duchess-deal",
+   "similar": [
+    "pride-and-prejudice",
+    "bringing-down-the-duke",
+    "emma",
+    "a-rogue-of-one-s-own",
+    "northanger-abbey",
+    "mansfield-park"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-duke-and-i",
+   "similar": [
+    "atomic-habits"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-duke-and-i",
+   "similar": [
+    "romancing-mister-bridgerton",
+    "venetia",
+    "devil-in-winter",
+    "frederica",
+    "persuasion",
+    "sense-and-sensibility"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-emperor-of-all-maladies",
+   "similar": [
+    "atomic-habits",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-emperor-of-all-maladies",
+   "similar": [
+    "the-gene",
+    "homo-deus",
+    "thinking-fast-and-slow",
+    "sapiens",
+    "silent-spring"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-fall-of-hyperion",
+   "similar": [
+    "blindsight",
+    "hyperion",
+    "rendezvous-with-rama",
+    "i-robot",
+    "the-martian"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-fellowship-of-the-ring",
+   "similar": [
+    "the-two-towers",
+    "the-hobbit",
+    "the-return-of-the-king",
+    "the-curse-of-chalion",
+    "the-lies-of-locke-lamora",
+    "the-silmarillion"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-fifth-season",
+   "similar": [
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-fifth-season",
+   "similar": [
+    "the-obelisk-gate",
+    "assassin-s-apprentice",
+    "jonathan-strange-mr-norrell",
+    "the-tombs-of-atuan",
+    "the-return-of-the-king"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-fisherman",
+   "similar": [
+    "northanger-abbey"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "the-fisherman",
+   "similar": [
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-fisherman",
+   "similar": [
+    "mexican-gothic",
+    "annihilation",
+    "house-of-leaves",
+    "at-the-mountains-of-madness"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-gene",
+   "similar": [
+    "atomic-habits",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-gene",
+   "similar": [
+    "thinking-fast-and-slow",
+    "the-emperor-of-all-maladies",
+    "gödel-escher-bach",
+    "homo-deus",
+    "the-demon-haunted-world",
+    "the-structure-of-scientific-revolutions"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-girl-with-the-dragon-tattoo",
+   "similar": [
+    "sapiens",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-girl-with-the-dragon-tattoo",
+   "similar": [
+    "gone-girl",
+    "the-maltese-falcon",
+    "sharp-objects",
+    "the-big-sleep",
+    "snow-falling-on-cedars"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-grand-sophy",
+   "similar": [
+    "frederica",
+    "northanger-abbey",
+    "venetia",
+    "mansfield-park",
+    "persuasion"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-great-gatsby",
+   "similar": [
+    "the-stranger",
+    "the-secret-history",
+    "mexican-gothic",
+    "2001-a-space-odyssey",
+    "the-left-hand-of-darkness",
+    "blindsight",
+    "the-dark-forest",
+    "second-foundation",
+    "the-martian",
+    "the-fifth-season",
+    "piranesi",
+    "the-hobbit",
+    "a-storm-of-swords",
+    "the-lies-of-locke-lamora",
+    "jonathan-strange-mr-norrell",
+    "devil-in-winter",
+    "persuasion",
+    "venetia",
+    "sense-and-sensibility",
+    "romancing-mister-bridgerton",
+    "frederica",
+    "the-murder-of-roger-ackroyd",
+    "the-girl-with-the-dragon-tattoo",
+    "the-silence-of-the-lambs",
+    "the-big-sleep",
+    "mystic-river",
+    "the-haunting-of-hill-house",
+    "the-shining",
+    "the-fisherman",
+    "pet-sematary",
+    "we-have-always-lived-in-the-castle",
+    "the-demon-haunted-world",
+    "the-immortal-life-of-henrietta-lacks",
+    "the-gene",
+    "a-brief-history-of-time",
+    "the-emperor-of-all-maladies",
+    "cosmos",
+    "man-s-search-for-meaning",
+    "thus-spoke-zarathustra",
+    "the-consolation-of-philosophy",
+    "meditations",
+    "being-and-time",
+    "the-myth-of-sisyphus",
+    "deep-work",
+    "the-power-of-habit",
+    "atomic-habits",
+    "the-tipping-point",
+    "never-split-the-difference",
+    "good-to-great"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "the-great-gatsby",
+   "similar": [
+    "atomic-habits"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-great-gatsby",
+   "similar": [
+    "beloved",
+    "to-the-lighthouse",
+    "song-of-solomon",
+    "mrs-dalloway",
+    "the-brothers-karamazov",
+    "crime-and-punishment"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-hard-thing-about-hard-things",
+   "similar": [
+    "thinking-fast-and-slow",
+    "meditations"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "the-hard-thing-about-hard-things",
+   "similar": [
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-hard-thing-about-hard-things",
+   "similar": [
+    "never-split-the-difference",
+    "good-to-great",
+    "influence",
+    "zero-to-one",
+    "deep-work"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-haunting-of-hill-house",
+   "similar": [
+    "piranesi"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "the-haunting-of-hill-house",
+   "similar": [
+    "sapiens",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-haunting-of-hill-house",
+   "similar": [
+    "we-have-always-lived-in-the-castle",
+    "frankenstein",
+    "at-the-mountains-of-madness",
+    "dracula"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-hobbit",
+   "similar": [
+    "atomic-habits",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-hobbit",
+   "similar": [
+    "the-fellowship-of-the-ring",
+    "the-curse-of-chalion",
+    "the-two-towers",
+    "piranesi",
+    "the-blade-itself",
+    "the-return-of-the-king",
+    "the-silmarillion"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-hound-of-the-baskervilles",
+   "similar": [
+    "a-study-in-scarlet",
+    "the-thursday-murder-club",
+    "the-adventures-of-sherlock-holmes",
+    "snow-falling-on-cedars",
+    "murder-on-the-orient-express",
+    "sharp-objects"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-immortal-life-of-henrietta-lacks",
+   "similar": [
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-immortal-life-of-henrietta-lacks",
+   "similar": [
+    "entangled-life",
+    "silent-spring",
+    "why-we-sleep",
+    "the-structure-of-scientific-revolutions",
+    "the-demon-haunted-world",
+    "the-selfish-gene"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-lean-startup",
+   "similar": [
+    "thinking-fast-and-slow"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "the-lean-startup",
+   "similar": [
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-lean-startup",
+   "similar": [
+    "zero-to-one",
+    "so-good-they-can-t-ignore-you",
+    "good-to-great",
+    "deep-work",
+    "the-tipping-point",
+    "never-split-the-difference"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-left-hand-of-darkness",
+   "similar": [
+    "one-hundred-years-of-solitude",
+    "middlemarch",
+    "beloved",
+    "things-fall-apart"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "the-left-hand-of-darkness",
+   "similar": [
+    "atomic-habits",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-left-hand-of-darkness",
+   "similar": [
+    "the-dispossessed",
+    "2001-a-space-odyssey",
+    "neuromancer",
+    "childhood-s-end",
+    "do-androids-dream-of-electric-sheep",
+    "the-stars-my-destination",
+    "a-wizard-of-earthsea",
+    "the-tombs-of-atuan"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-lies-of-locke-lamora",
+   "similar": [
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-lies-of-locke-lamora",
+   "similar": [
+    "a-wizard-of-earthsea",
+    "the-blade-itself",
+    "the-tombs-of-atuan",
+    "mistborn",
+    "a-clash-of-kings"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-maltese-falcon",
+   "similar": [
+    "atomic-habits",
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-maltese-falcon",
+   "similar": [
+    "the-girl-with-the-dragon-tattoo",
+    "the-big-sleep",
+    "gone-girl",
+    "the-murder-of-roger-ackroyd",
+    "the-thursday-murder-club",
+    "and-then-there-were-none"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-martian",
+   "similar": [
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-martian",
+   "similar": [
+    "solaris",
+    "project-hail-mary",
+    "roadside-picnic",
+    "a-memory-called-empire",
+    "the-left-hand-of-darkness"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-murder-of-roger-ackroyd",
+   "similar": [
+    "sapiens",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-murder-of-roger-ackroyd",
+   "similar": [
+    "the-big-sleep",
+    "and-then-there-were-none",
+    "the-maltese-falcon",
+    "murder-on-the-orient-express",
+    "the-adventures-of-sherlock-holmes",
+    "a-study-in-scarlet"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-myth-of-sisyphus",
+   "similar": [
+    "the-dispossessed"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "the-myth-of-sisyphus",
+   "similar": [
+    "atomic-habits",
+    "sapiens",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-myth-of-sisyphus",
+   "similar": [
+    "the-stranger",
+    "being-and-time",
+    "man-s-search-for-meaning",
+    "thus-spoke-zarathustra",
+    "beyond-good-and-evil",
+    "letters-from-a-stoic"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-name-of-the-wind",
+   "similar": [
+    "the-wise-man-s-fear",
+    "a-storm-of-swords",
+    "the-way-of-kings",
+    "a-clash-of-kings",
+    "the-return-of-the-king"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-no-1-ladies-detective-agency",
+   "similar": [
+    "atomic-habits"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-no-1-ladies-detective-agency",
+   "similar": [
+    "snow-falling-on-cedars",
+    "mystic-river",
+    "the-thursday-murder-club",
+    "the-secret-history",
+    "in-the-woods"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-obelisk-gate",
+   "similar": [
+    "jonathan-strange-mr-norrell",
+    "the-fifth-season",
+    "the-priory-of-the-orange-tree",
+    "assassin-s-apprentice",
+    "a-game-of-thrones",
+    "mistborn"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-only-good-indians",
+   "similar": [
+    "the-silence-of-the-lambs"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "the-only-good-indians",
+   "similar": [
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-only-good-indians",
+   "similar": [
+    "tender-is-the-flesh",
+    "house-of-leaves",
+    "the-shining",
+    "mexican-gothic"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-order-of-time",
+   "similar": [
+    "atomic-habits"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-order-of-time",
+   "similar": [
+    "seven-brief-lessons-on-physics",
+    "why-we-sleep",
+    "a-brief-history-of-time",
+    "entangled-life",
+    "guns-germs-and-steel",
+    "thinking-fast-and-slow"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-power-of-habit",
+   "similar": [
+    "thinking-fast-and-slow",
+    "meditations",
+    "man-s-search-for-meaning"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "the-power-of-habit",
+   "similar": [
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-power-of-habit",
+   "similar": [
+    "range",
+    "influence",
+    "outliers",
+    "never-split-the-difference",
+    "the-tipping-point",
+    "zero-to-one"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-priory-of-the-orange-tree",
+   "similar": [
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-priory-of-the-orange-tree",
+   "similar": [
+    "piranesi",
+    "jonathan-strange-mr-norrell",
+    "the-curse-of-chalion",
+    "the-obelisk-gate",
+    "the-fellowship-of-the-ring"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-quantum-thief",
+   "similar": [
+    "revelation-space",
+    "a-fire-upon-the-deep",
+    "house-of-suns",
+    "anathem",
+    "project-hail-mary"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-remains-of-the-day",
+   "similar": [
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-remains-of-the-day",
+   "similar": [
+    "never-let-me-go",
+    "things-fall-apart",
+    "a-fine-balance",
+    "love-in-the-time-of-cholera",
+    "the-great-gatsby"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-republic",
+   "similar": [
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-republic",
+   "similar": [
+    "nicomachean-ethics",
+    "letters-from-a-stoic",
+    "beyond-good-and-evil",
+    "meditations",
+    "man-s-search-for-meaning",
+    "a-theory-of-justice"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-return-of-the-king",
+   "similar": [
+    "atomic-habits",
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-return-of-the-king",
+   "similar": [
+    "the-silmarillion",
+    "the-two-towers",
+    "a-game-of-thrones",
+    "the-fellowship-of-the-ring",
+    "the-curse-of-chalion",
+    "the-hobbit"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-secret-history",
+   "similar": [
+    "the-brothers-karamazov",
+    "wuthering-heights",
+    "stoner",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "the-secret-history",
+   "similar": [
+    "atomic-habits",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-secret-history",
+   "similar": [
+    "mystic-river",
+    "in-the-woods",
+    "the-no-1-ladies-detective-agency",
+    "the-silence-of-the-lambs",
+    "sharp-objects"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-selfish-gene",
+   "similar": [
+    "guns-germs-and-steel",
+    "the-demon-haunted-world",
+    "sapiens",
+    "cosmos",
+    "entangled-life"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-shining",
+   "similar": [
+    "the-silence-of-the-lambs"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "the-shining",
+   "similar": [
+    "sapiens",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-shining",
+   "similar": [
+    "it",
+    "tender-is-the-flesh",
+    "pet-sematary",
+    "the-only-good-indians",
+    "the-fisherman"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-silence-of-the-lambs",
+   "similar": [
+    "the-shining",
+    "annihilation",
+    "frankenstein",
+    "the-only-good-indians"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "the-silence-of-the-lambs",
+   "similar": [
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-silence-of-the-lambs",
+   "similar": [
+    "in-the-woods",
+    "sharp-objects",
+    "the-secret-history",
+    "gone-girl",
+    "the-thursday-murder-club"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-silmarillion",
+   "similar": [
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-silmarillion",
+   "similar": [
+    "a-game-of-thrones",
+    "the-return-of-the-king",
+    "a-clash-of-kings",
+    "the-two-towers",
+    "piranesi",
+    "the-hobbit",
+    "the-fellowship-of-the-ring"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-stars-my-destination",
+   "similar": [
+    "ubik",
+    "roadside-picnic",
+    "do-androids-dream-of-electric-sheep",
+    "solaris",
+    "foundation-and-empire",
+    "snow-crash"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-stranger",
+   "similar": [
+    "gilead",
+    "jane-eyre",
+    "a-fine-balance",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "the-stranger",
+   "similar": [
+    "man-s-search-for-meaning",
+    "the-myth-of-sisyphus",
+    "tao-te-ching",
+    "being-and-time",
+    "critique-of-pure-reason",
+    "thus-spoke-zarathustra"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-structure-of-scientific-revolutions",
+   "similar": [
+    "silent-spring",
+    "gödel-escher-bach",
+    "the-immortal-life-of-henrietta-lacks",
+    "thinking-fast-and-slow",
+    "the-emperor-of-all-maladies",
+    "guns-germs-and-steel"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-three-body-problem",
+   "similar": [
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-three-body-problem",
+   "similar": [
+    "the-dark-forest",
+    "house-of-suns",
+    "death-s-end",
+    "revelation-space",
+    "foundation-and-empire",
+    "i-robot"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-thursday-murder-club",
+   "similar": [
+    "the-hound-of-the-baskervilles",
+    "snow-falling-on-cedars",
+    "a-study-in-scarlet",
+    "the-no-1-ladies-detective-agency",
+    "and-then-there-were-none"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-tipping-point",
+   "similar": [
+    "man-s-search-for-meaning"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "the-tipping-point",
+   "similar": [
+    "sapiens",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-tipping-point",
+   "similar": [
+    "antifragile",
+    "outliers",
+    "the-black-swan",
+    "range",
+    "never-split-the-difference"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-tombs-of-atuan",
+   "similar": [
+    "atomic-habits"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-tombs-of-atuan",
+   "similar": [
+    "assassin-s-apprentice",
+    "a-wizard-of-earthsea",
+    "the-fifth-season",
+    "the-lies-of-locke-lamora",
+    "the-name-of-the-wind",
+    "the-two-towers",
+    "the-left-hand-of-darkness",
+    "the-dispossessed"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-two-towers",
+   "similar": [
+    "the-return-of-the-king",
+    "the-fellowship-of-the-ring",
+    "the-silmarillion",
+    "the-hobbit",
+    "the-lies-of-locke-lamora",
+    "a-clash-of-kings"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-way-of-kings",
+   "similar": [
+    "atomic-habits"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-way-of-kings",
+   "similar": [
+    "words-of-radiance",
+    "the-wise-man-s-fear",
+    "mistborn",
+    "the-name-of-the-wind",
+    "the-blade-itself"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "the-wise-man-s-fear",
+   "similar": [
+    "atomic-habits",
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "the-wise-man-s-fear",
+   "similar": [
+    "the-way-of-kings",
+    "the-name-of-the-wind",
+    "words-of-radiance",
+    "a-storm-of-swords",
+    "the-two-towers"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "things-fall-apart",
+   "similar": [
+    "the-left-hand-of-darkness",
+    "persuasion"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "things-fall-apart",
+   "similar": [
+    "sapiens"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "things-fall-apart",
+   "similar": [
+    "the-remains-of-the-day",
+    "love-in-the-time-of-cholera",
+    "never-let-me-go",
+    "one-hundred-years-of-solitude",
+    "the-great-gatsby",
+    "jane-eyre"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "thinking-fast-and-slow",
+   "similar": [
+    "the-lean-startup",
+    "the-hard-thing-about-hard-things",
+    "the-power-of-habit",
+    "so-good-they-can-t-ignore-you"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "thinking-fast-and-slow",
+   "similar": [
+    "gödel-escher-bach",
+    "the-gene",
+    "the-structure-of-scientific-revolutions",
+    "the-emperor-of-all-maladies",
+    "the-immortal-life-of-henrietta-lacks"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "thus-spoke-zarathustra",
+   "similar": [
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "thus-spoke-zarathustra",
+   "similar": [
+    "being-and-time",
+    "beyond-good-and-evil",
+    "the-myth-of-sisyphus",
+    "nicomachean-ethics",
+    "letters-from-a-stoic",
+    "tao-te-ching"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "to-the-lighthouse",
+   "similar": [
+    "the-great-gatsby",
+    "mrs-dalloway",
+    "beloved",
+    "wuthering-heights",
+    "crime-and-punishment"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "ubik",
+   "similar": [
+    "do-androids-dream-of-electric-sheep",
+    "the-stars-my-destination",
+    "dune",
+    "roadside-picnic",
+    "cryptonomicon",
+    "the-martian"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "venetia",
+   "similar": [
+    "atomic-habits",
+    "sapiens",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "venetia",
+   "similar": [
+    "the-duke-and-i",
+    "frederica",
+    "romancing-mister-bridgerton",
+    "the-grand-sophy",
+    "devil-in-winter",
+    "sense-and-sensibility"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "war-and-peace",
+   "similar": [
+    "atomic-habits"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "war-and-peace",
+   "similar": [
+    "crime-and-punishment",
+    "anna-karenina",
+    "the-brothers-karamazov",
+    "middlemarch",
+    "song-of-solomon",
+    "a-fine-balance"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "we-have-always-lived-in-the-castle",
+   "similar": [
+    "northanger-abbey",
+    "piranesi"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "we-have-always-lived-in-the-castle",
+   "similar": [
+    "sapiens",
+    "the-great-gatsby"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "we-have-always-lived-in-the-castle",
+   "similar": [
+    "at-the-mountains-of-madness",
+    "the-haunting-of-hill-house",
+    "annihilation",
+    "frankenstein",
+    "the-fisherman"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "why-we-sleep",
+   "similar": [
+    "the-order-of-time",
+    "entangled-life",
+    "seven-brief-lessons-on-physics",
+    "the-immortal-life-of-henrietta-lacks",
+    "a-brief-history-of-time",
+    "the-emperor-of-all-maladies"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "words-of-radiance",
+   "similar": [
+    "mistborn",
+    "the-way-of-kings",
+    "the-blade-itself",
+    "the-wise-man-s-fear",
+    "the-fellowship-of-the-ring"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "wuthering-heights",
+   "similar": [
+    "the-secret-history",
+    "jonathan-strange-mr-norrell",
+    "mexican-gothic"
+   ],
+   "kind": "az_also_bought"
+  },
+  {
+   "src": "wuthering-heights",
+   "similar": [
+    "atomic-habits"
+   ],
+   "kind": "az_also_viewed"
+  },
+  {
+   "src": "wuthering-heights",
+   "similar": [
+    "mrs-dalloway",
+    "jane-eyre",
+    "to-the-lighthouse",
+    "bleak-house",
+    "madame-bovary",
+    "lincoln-in-the-bardo"
+   ],
+   "kind": "gr_similar"
+  },
+  {
+   "src": "zero-to-one",
+   "similar": [
+    "good-to-great",
+    "the-lean-startup",
+    "the-hard-thing-about-hard-things",
+    "so-good-they-can-t-ignore-you",
+    "antifragile"
+   ],
+   "kind": "gr_similar"
+  }
+ ]
+}
