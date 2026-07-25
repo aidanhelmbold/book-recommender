@@ -49,6 +49,28 @@ to contrast against each other, so this may resolve itself on the full graph —
 judge from real full-run labels before adding a stopword list, since a hardcoded
 English list would be the wrong fix for a multilingual corpus.
 
+### Bridge books are CLI-only, not in the web app
+`bookmap bridges` works, but the web front end has no bridges endpoint and no UI
+for them — `web/app.py` has never heard of the feature. Since the map is where
+"show me how these two genres connect" is most naturally *seen*, this is the more
+valuable half and it is the half that is missing.
+
+Sketched so it is cheap to pick up:
+
+- `GET /api/bridges?seeds=…&top_n=…` — the logic already exists; lift the body of
+  the `bridges` CLI command into a shared helper rather than duplicating it, since
+  the community-reading and over-fetch-then-filter behaviour is easy to get subtly
+  wrong twice.
+- Surface in the map as a **fourth role**. Careful: the role palette is capped at
+  three hues because only three clear the colour-vision separation floors for an
+  all-pairs form (see `docs/plan.md`). So a bridge must be marked by *shape or
+  ring*, not a new colour — a diamond, or a second concentric ring like seeds
+  already carry — with the legend row and tooltip carrying the identity.
+- A sidebar panel listing bridges for the current seeds, clicking one to centre it
+  on the map, is probably more useful than any on-canvas treatment.
+- Test as with the others: endpoint contract via `TestClient`, plus a real-browser
+  check that the mark is distinguishable from a seed in both themes.
+
 ### Amazon and Open Library paths are untested on real data
 Both adapters are unit-tested against fixtures in the real formats, but no SNAP
 `amazon-meta.txt`, Amazon Reviews 2023 file, or live Open Library call has ever
