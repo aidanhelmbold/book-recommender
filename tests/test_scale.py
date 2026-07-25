@@ -89,11 +89,18 @@ class TestProjectionAtScale:
         rng = np.random.default_rng(7)
         src = rng.integers(0, 200_000, size=n_edges)
         dst = rng.integers(0, 200_000, size=n_edges)
+        # Canonicalised to src < dst, matching what fuse_edges emits and what the
+        # schema documents. Storing both (x, y) and (y, x) would make project()
+        # sum the two directions and double those weights -- the timing assertion
+        # below would still pass, so the invariant has to be honoured here rather
+        # than defended against downstream.
+        low = np.minimum(src, dst)
+        high = np.maximum(src, dst)
 
         with Store.open(tmp_path / "big.duckdb") as store:
             store.replace_fused_edges(
                 FusedEdge(f"w{a}", f"w{b}", 0.5)
-                for a, b in zip(src, dst, strict=True)
+                for a, b in zip(low, high, strict=True)
                 if a != b
             )
             start = time.perf_counter()

@@ -52,12 +52,17 @@ _BOOK_COLUMNS = (
     ("title_norm", "str"),
 )
 _ALIAS_COLUMNS = (("id_type", "str"), ("id_value", "str"), ("work_id", "str"))
+# Declared in the order :func:`_key_reordered` emits, not the order the table
+# stores: the primary key (src, dst, kind, source) has to be a row prefix for
+# de-duplication, and _arrow_batch types columns by position. Column *names*
+# travel with the values into the INSERT, so the table's own layout is free to
+# keep rank in the middle.
 _RAW_EDGE_COLUMNS = (
     ("src", "str"),
     ("dst", "str"),
     ("kind", "str"),
-    ("rank", "int"),
     ("source", "str"),
+    ("rank", "int"),
 )
 _FUSED_EDGE_COLUMNS = (
     ("src", "str"),
@@ -157,7 +162,7 @@ class Store:
         rows: Sequence[tuple[object, ...]],
         *,
         key_width: int,
-        extra_sql: str = "",
+        derived: tuple[str, str] | None = None,
     ) -> int:
         """Upsert one batch through a registered Arrow table.
 
@@ -168,6 +173,11 @@ class Store:
         ``key_width`` is how many leading columns form the primary key; rows are
         de-duplicated on it because a single ``INSERT OR REPLACE`` cannot resolve
         two conflicting versions of the same key in one statement.
+
+        ``derived`` adds one column computed in SQL rather than carried in the
+        batch, as ``(column_name, expression)``. The two halves are kept separate
+        because an INSERT column list accepts only bare names -- putting the
+        expression in both lists is a parser error.
         """
         if not rows:
             return 0
@@ -175,11 +185,13 @@ class Store:
         deduped = {row[:key_width]: row for row in rows}  # last write wins
         batch = _arrow_batch(columns, list(deduped.values()))
         names = ", ".join(name for name, _ in columns)
+        insert_names = names if derived is None else f"{names}, {derived[0]}"
+        select_list = names if derived is None else f"{names}, {derived[1]}"
         self.conn.register(_STAGING_VIEW, batch)
         try:
             self.conn.execute(
-                f"INSERT OR REPLACE INTO {table} ({names}{extra_sql and ', ' + extra_sql})"  # noqa: S608 - table/column names are module constants
-                f" SELECT {names}{extra_sql and ', ' + extra_sql} FROM {_STAGING_VIEW}"
+                f"INSERT OR REPLACE INTO {table} ({insert_names})"  # noqa: S608 - table/column names are module constants
+                f" SELECT {select_list} FROM {_STAGING_VIEW}"
             )
         finally:
             self.conn.unregister(_STAGING_VIEW)
@@ -290,13 +302,25 @@ class Store:
         # An endpoint resolves to itself when it carries no known ref prefix --
         # which is what makes a second pass a no-op -- and to NULL when it is a
         # ref whose alias is absent, which is what marks it for dropping.
+        #
+        # The join onto ``books`` is the fallback for a source whose raw ids are
+        # already canonical work ids (the bundled demo corpus: its ids *are* the
+        # work ids, so there is nothing for ``upsert_books`` to alias). Without
+        # it every demo edge would resolve to NULL and be dropped, leaving a
+        # corpus of 177 books and no graph.
         conn.execute(
             f"""
             CREATE OR REPLACE TEMP TABLE _bookmap_resolved AS
             WITH ref_types(prefix, id_type) AS (VALUES {prefixes})
             SELECT
-                COALESCE(sa.work_id, CASE WHEN st.prefix IS NULL THEN e.src END) AS src,
-                COALESCE(da.work_id, CASE WHEN dt.prefix IS NULL THEN e.dst END) AS dst,
+                COALESCE(
+                    sa.work_id, sbook.work_id,
+                    CASE WHEN st.prefix IS NULL THEN e.src END
+                ) AS src,
+                COALESCE(
+                    da.work_id, dbook.work_id,
+                    CASE WHEN dt.prefix IS NULL THEN e.dst END
+                ) AS dst,
                 e.kind AS kind,
                 e."rank" AS "rank",
                 e.source AS source
@@ -306,11 +330,17 @@ class Store:
             LEFT JOIN aliases sa
                    ON sa.id_type = st.id_type
                   AND sa.id_value = substr(e.src, strpos(e.src, ':') + 1)
+            LEFT JOIN books sbook
+                   ON st.prefix IS NOT NULL
+                  AND sbook.work_id = substr(e.src, strpos(e.src, ':') + 1)
             LEFT JOIN ref_types dt
                    ON strpos(e.dst, ':') > 0 AND dt.prefix = split_part(e.dst, ':', 1)
             LEFT JOIN aliases da
                    ON da.id_type = dt.id_type
                   AND da.id_value = substr(e.dst, strpos(e.dst, ':') + 1)
+            LEFT JOIN books dbook
+                   ON dt.prefix IS NOT NULL
+                  AND dbook.work_id = substr(e.dst, strpos(e.dst, ':') + 1)
             """,  # noqa: S608 - the only interpolation is a placeholder list
             params,
         )
@@ -372,7 +402,7 @@ class Store:
             _INGEST_COLUMNS,
             [(str(source), str(artifact), rows_done, books_added, edges_added, completed)],
             key_width=2,
-            extra_sql="current_timestamp AS updated_at",
+            derived=("updated_at", "current_timestamp"),
         )
 
     # -- reads -------------------------------------------------------------
