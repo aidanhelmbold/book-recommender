@@ -386,6 +386,21 @@ class Store:
         with self.bulk_load():
             self._build_ref_map()
             try:
+                # Counted before the rewrite, and counted as *unresolvable rows*
+                # rather than as a row-count delta. Since editions collapse onto
+                # one work, two printings citing the same target legitimately
+                # become one edge, and a delta would report that merge as data
+                # loss -- inflating the number the CLI prints as "unresolvable
+                # edges dropped" and making the dump look dirtier than it is.
+                unresolvable = int(
+                    conn.execute(
+                        f"""
+                        SELECT count(*) FROM edges_raw e
+                        WHERE e.src IN (SELECT ref FROM {_REF_MAP_TABLE} WHERE work_id IS NULL)
+                           OR e.dst IN (SELECT ref FROM {_REF_MAP_TABLE} WHERE work_id IS NULL)
+                        """  # noqa: S608 - table name is a module constant
+                    ).fetchone()[0]
+                )
                 # Rows needing a *rewrite*, as opposed to rows merely needing to be
                 # dropped. Checked because the two cost wildly different amounts:
                 # dropping is a DELETE over a fraction of the table, while
@@ -408,8 +423,7 @@ class Store:
             finally:
                 conn.execute(f"DROP TABLE IF EXISTS {_REF_MAP_TABLE}")
 
-        kept = int(conn.execute("SELECT count(*) FROM edges_raw").fetchone()[0])
-        return before - kept
+        return unresolvable
 
     def _build_ref_map(self) -> None:
         """Populate :data:`_REF_MAP_TABLE`: ``ref -> work_id``, ``NULL`` if unknown.

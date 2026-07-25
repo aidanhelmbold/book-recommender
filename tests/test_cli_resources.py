@@ -74,3 +74,19 @@ class TestResourceOptions:
         )
         assert result.exit_code != 0
         assert "Traceback" not in result.output
+
+
+class TestMissingDatabaseMessage:
+    """A wrong --db is the likeliest mistake once more than one database exists.
+
+    The original message only suggested `ingest demo`, which is actively
+    misleading for someone who has a real database at another path -- the fix is
+    to name the flag they forgot.
+    """
+
+    def test_names_the_db_flag(self, tmp_path: Path) -> None:
+        for command in (["web"], ["stats"], ["recommend", "--seeds", "Dune"]):
+            result = runner.invoke(app, [*command, "--db", str(tmp_path / "absent.duckdb")])
+            assert result.exit_code != 0
+            assert "--db" in result.output, f"{command} did not mention --db"
+            assert "absent.duckdb" in result.output

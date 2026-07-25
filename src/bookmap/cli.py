@@ -112,7 +112,11 @@ def _open_readable(db: str) -> Store:
     """
     path = Path(db)
     if not path.exists():
-        _fail(f"no such database: {db} (run 'bookmap ingest demo' first)")
+        _fail(
+            f"no such database: {db}\n"
+            f"  if you built elsewhere, point at it with --db PATH\n"
+            f"  otherwise create one with: bookmap ingest demo"
+        )
     try:
         return Store.open(path, read_only=True)
     except Exception as exc:  # noqa: BLE001 - duckdb raises a family of IO errors
@@ -893,7 +897,11 @@ def web(db: str = DEFAULT_DB_PATH, host: str = "127.0.0.1", port: int = 8000) ->
     from bookmap.web.app import create_app
 
     if not Path(db).exists():
-        _fail(f"no such database: {db} (run 'bookmap ingest demo' first)")
+        _fail(
+            f"no such database: {db}\n"
+            f"  if you built elsewhere, point at it with --db PATH\n"
+            f"  otherwise create one with: bookmap ingest demo"
+        )
     console.print(f"serving [green]http://{host}:{port}[/green] from {db}")
     uvicorn.run(create_app(db), host=host, port=port)
 

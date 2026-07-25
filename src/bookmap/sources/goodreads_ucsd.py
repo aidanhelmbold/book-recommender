@@ -168,7 +168,12 @@ class GoodreadsUCSDSource(FileSource):
 
             series = record.get("series") or ()
             yield Book(
-                work_id=WORK_ID_PREFIX + book_id,
+                # The dump distinguishes edition (``book_id``) from work
+                # (``work_id``), and the node must be the work: keying on the
+                # edition splits one book's similar-books evidence across every
+                # printing of it. The real dump has five Dune editions, each
+                # carrying a fifth of the signal the recommender walks.
+                work_id=WORK_ID_PREFIX + (text_or_none(record.get("work_id")) or book_id),
                 title=title,
                 authors=tuple(authors),
                 year=int_or_none(record.get("publication_year")),
@@ -294,6 +299,12 @@ class GoodreadsUCSDSource(FileSource):
         WITH titled AS (
             SELECT
                 NULLIF(TRIM(CAST({sql_column(present, "book_id")} AS VARCHAR)), '') AS goodreads_id,
+                -- Work, not edition; falls back to the edition id for the
+                -- minority of records that carry no work_id.
+                COALESCE(
+                    NULLIF(TRIM(CAST({sql_column(present, "work_id")} AS VARCHAR)), ''),
+                    NULLIF(TRIM(CAST({sql_column(present, "book_id")} AS VARCHAR)), '')
+                ) AS work_key,
                 COALESCE(
                     NULLIF(TRIM(CAST({sql_column(present, "title_without_series")} AS VARCHAR)), ''),
                     NULLIF(TRIM(CAST({sql_column(present, "title")} AS VARCHAR)), '')
@@ -315,7 +326,7 @@ class GoodreadsUCSDSource(FileSource):
         {authors_cte}
         final AS (
             SELECT
-                '{WORK_ID_PREFIX}' || kept.goodreads_id AS work_id,
+                '{WORK_ID_PREFIX}' || kept.work_key AS work_id,
                 kept.title AS title,
                 COALESCE(resolved_authors.authors, []::VARCHAR[]) AS authors,
                 kept.year, kept.isbn13, kept.asin, kept.goodreads_id,
@@ -336,6 +347,9 @@ class GoodreadsUCSDSource(FileSource):
             work_id, title, authors, year, isbn13, asin, goodreads_id, series,
             avg_rating, ratings_count
         FROM final
+        -- The most-rated edition wins the display title, so a work shows up as
+        -- "Dune" rather than whichever printing happened to be last in the file.
+        ORDER BY work_id, ratings_count DESC NULLS LAST, goodreads_id
         ON CONFLICT (work_id) DO UPDATE SET
             title = excluded.title,
             authors = excluded.authors,
@@ -377,6 +391,12 @@ class GoodreadsUCSDSource(FileSource):
         WITH kept AS (
             SELECT
                 NULLIF(TRIM(CAST({sql_column(present, "book_id")} AS VARCHAR)), '') AS goodreads_id,
+                -- Work, not edition; falls back to the edition id for the
+                -- minority of records that carry no work_id.
+                COALESCE(
+                    NULLIF(TRIM(CAST({sql_column(present, "work_id")} AS VARCHAR)), ''),
+                    NULLIF(TRIM(CAST({sql_column(present, "book_id")} AS VARCHAR)), '')
+                ) AS work_key,
                 similar_books
             FROM read_json(?, format='newline_delimited')
             WHERE NULLIF(TRIM(CAST({sql_column(present, "book_id")} AS VARCHAR)), '') IS NOT NULL
