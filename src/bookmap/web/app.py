@@ -22,6 +22,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
+from bookmap.bridges import BridgesUnavailable, find_bridges
 from bookmap.config import LayoutConfig, RecommendConfig
 from bookmap.graph.layout import force_atlas2, normalize_positions
 from bookmap.recommend import recommend as run_recommend
@@ -322,6 +323,24 @@ def create_app(db_path: str = "bookmap.duckdb") -> FastAPI:
                 for neighbor, weight in pairs
             ],
         }
+
+    @app.get("/api/bridges")
+    def bridges_endpoint(
+        seeds: str = Query("", description="Comma-separated titles to restrict to."),
+        top_n: int = Query(20, ge=1, le=200),
+    ) -> dict[str, Any]:
+        """Books linking two otherwise-separate reading communities.
+
+        A missing community partition is a 409 rather than a 500: the database is
+        readable, the graph simply has not been built, and that is the caller's to
+        fix by running ``bookmap build``.
+        """
+        wanted = [part.strip() for part in seeds.split(",") if part.strip()]
+        with lock:
+            try:
+                return find_bridges(store, projection, seeds=wanted or None, top_n=top_n)
+            except BridgesUnavailable as exc:
+                raise HTTPException(status_code=409, detail=str(exc)) from exc
 
     @app.get("/api/stats")
     def stats() -> dict[str, Any]:

@@ -45,6 +45,7 @@ def detect_communities(
     *,
     resolution: float = 1.0,
     seed: int = 1917,
+    iterations: int = 2,
 ) -> np.ndarray:
     """Partition the graph, returning a community id per node.
 
@@ -65,20 +66,21 @@ def detect_communities(
     targets = upper.col.astype(np.int64)
     weights = upper.data.astype(float)
 
-    membership = _leiden(n_nodes, sources, targets, weights, resolution, seed)
+    membership = _leiden(n_nodes, sources, targets, weights, resolution, seed, iterations)
     if membership is None:
         membership = _greedy_modularity(n_nodes, sources, targets, weights, resolution)
 
     return _renumber_by_size(membership)
 
 
-def _leiden(
+def _leiden(  # noqa: PLR0913 - a thin passthrough to leidenalg
     n_nodes: int,
     sources: np.ndarray,
     targets: np.ndarray,
     weights: np.ndarray,
     resolution: float,
     seed: int,
+    iterations: int = 2,
 ) -> np.ndarray | None:
     """Leiden partition, or ``None`` if igraph/leidenalg are unavailable."""
     try:
@@ -95,7 +97,12 @@ def _leiden(
         resolution_parameter=resolution,
         # -1 iterates until no further improvement, which is what makes the
         # result reproducible rather than dependent on an iteration budget.
-        n_iterations=-1,
+        # Bounded, not -1. "Iterate until convergence" is unbounded, and on a
+        # 392k-node / 5.1M-edge graph it ran long enough to look hung with no
+        # progress output. Leiden's own guidance is that two iterations is
+        # normally enough; the marginal modularity past that is small and the
+        # runtime cost is not.
+        n_iterations=iterations,
         seed=seed,
     )
     return np.asarray(partition.membership, dtype=np.int64)

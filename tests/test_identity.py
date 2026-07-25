@@ -238,3 +238,41 @@ class TestResolveSeed:
 
     def test_empty_candidate_list(self) -> None:
         assert not resolve_seed("Dune", []).resolved
+
+
+class TestTieBreakPrefersCallerOrder:
+    """Ties must break toward the caller's ordering, not toward a hash.
+
+    Found on the real dump. ``normalize_title`` truncates at a subtitle marker, so
+    "Dune - The Official Comic Book" and "Foundation: Redefine Your Core, Conquer
+    Back Pain" normalise to exactly "dune" and "foundation" — tying with the books
+    anyone actually means. The store hands candidates over most-rated first, but
+    resolve_seed re-sorted on work_id and discarded that, so seeding "Foundation"
+    resolved to a fitness book and returned twenty pages of exercise manuals.
+
+    Ranking the candidates is the caller's job — it has the ratings counts. All
+    this needs to do is not destroy that order.
+    """
+
+    # Most-rated first, as the store returns them.
+    BY_POPULARITY = [
+        ("w-real-dune", "Dune", ("Frank Herbert",)),
+        ("w-comic", "Dune - The Official Comic Book", ("Bill Sienkiewicz",)),
+        ("w-gateway", "Dune: The Gateway Collection", ("Frank Herbert",)),
+    ]
+
+    def test_first_candidate_wins_an_exact_tie(self) -> None:
+        assert resolve_seed("Dune", self.BY_POPULARITY).work_id == "w-real-dune"
+
+    def test_holds_whatever_the_work_ids_are(self) -> None:
+        """A work id that sorts first alphabetically must not win on that account."""
+        candidates = [
+            ("zzz-real", "Foundation", ("Isaac Asimov",)),
+            ("aaa-fitness", "Foundation: Redefine Your Core, Conquer Back Pain", ("Eric Goodman",)),
+        ]
+        assert resolve_seed("Foundation", candidates).work_id == "zzz-real"
+
+    def test_still_reports_the_tie_as_ambiguous(self) -> None:
+        """Picking a sensible default does not mean hiding that it was a guess."""
+        match = resolve_seed("Dune", self.BY_POPULARITY)
+        assert match.ambiguous

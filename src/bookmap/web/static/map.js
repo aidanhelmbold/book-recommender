@@ -18,11 +18,14 @@ const resultsEl = document.getElementById("results");
 const emptyEl = document.getElementById("empty");
 const legendEl = document.getElementById("legend");
 const clustersEl = document.getElementById("clusters");
+const bridgesEl = document.getElementById("bridges");
+const bridgeListEl = document.getElementById("bridge-list");
 
 let graph = { nodes: [], edges: [], community_labels: {} };
 let view = { scale: 1, x: 0, y: 0 };
 let hovered = null;
 let selected = null;
+let bridgeIds = new Set();
 
 const css = (name) =>
   getComputedStyle(document.querySelector(".viz-root")).getPropertyValue(name).trim();
@@ -135,6 +138,19 @@ function draw() {
     ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.fillStyle = roleColour(node.role);
     ctx.fill();
+
+    // Bridges get a double ring rather than a colour of their own: the role
+    // palette is capped at three validated hues, so a fourth would be
+    // indistinguishable from blue for a protanopic reader. Geometry is not.
+    if (bridgeIds.has(node.work_id)) {
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = css("--text-secondary");
+      for (const gap of [3, 6]) {
+        ctx.beginPath();
+        ctx.arc(x, y, r + gap, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
 
     // Seeds also carry a ring: role must not rest on hue alone.
     if (node.role === "seed") {
@@ -317,6 +333,7 @@ async function run() {
     renderResults(recs);
     renderLegend();
     renderClusters();
+    loadBridges(seeds);
     fitToView();
 
     const parts = [`${sub.nodes.length} books, ${sub.edges.length} connections`];
@@ -324,6 +341,51 @@ async function run() {
     setStatus(parts.join(" · "), recs.unresolved.length ? "warn" : "");
   } catch (error) {
     setStatus(`Failed: ${error.message}`, "error");
+  }
+}
+
+async function loadBridges(seeds) {
+  if (!bridgesEl || !bridgeListEl) return;
+  try {
+    const params = new URLSearchParams({ seeds: seeds.join(","), top_n: "8" });
+    const response = await fetch(`/api/bridges?${params}`);
+    if (!response.ok) {
+      // 409 means the graph has no communities yet; nothing to bridge between.
+      bridgesEl.hidden = true;
+      return;
+    }
+    const { bridges } = await response.json();
+    bridgeIds = new Set(bridges.map((b) => b.work_id));
+    bridgeListEl.innerHTML = "";
+    for (const bridge of bridges) {
+      const names = bridge.community_labels
+        .map((label, i) => label || `cluster ${bridge.communities[i]}`)
+        .slice(0, 2);
+      const extra = bridge.communities.length - names.length;
+      const li = document.createElement("li");
+      const title = document.createElement("span");
+      title.className = "b-title";
+      title.textContent = bridge.title;
+      const connects = document.createElement("span");
+      connects.className = "b-connects";
+      connects.textContent =
+        names.join(" ↔ ") + (extra > 0 ? `  +${extra} more` : "");
+      li.append(title, connects);
+      li.addEventListener("click", () => {
+        const node = graph.nodes.find((n) => n.work_id === bridge.work_id);
+        if (node) {
+          selected = node;
+          draw();
+        } else {
+          setStatus(`${bridge.title} is not on this map — it bridges clusters further out`);
+        }
+      });
+      bridgeListEl.append(li);
+    }
+    bridgesEl.hidden = bridges.length === 0;
+    draw();
+  } catch {
+    bridgesEl.hidden = true;
   }
 }
 

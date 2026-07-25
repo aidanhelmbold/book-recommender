@@ -227,7 +227,7 @@ def resolve_seed(
     query_tokens = query_norm.split()
 
     scored: list[tuple[float, str, str, tuple[str, ...]]] = []
-    for work_id, title, authors in candidates:
+    for position, (work_id, title, authors) in enumerate(candidates):
         author_tokens = {
             token
             for author in authors
@@ -245,14 +245,17 @@ def resolve_seed(
         # title ("harry potter") should still find it.
         base = fuzz.WRatio(remainder, normalize_title(title)) / 100.0
         score = base + (1.0 - base) * _AUTHOR_BONUS if named else base
-        scored.append((score, work_id, title, tuple(authors)))
+        scored.append((score, position, work_id, title, tuple(authors)))
 
     if not scored:
         return SeedMatch(query=query, work_id=None)
 
-    # Tie-break on work_id so the same corpus always resolves the same way.
+    # Tie-break on the caller's ordering, not on work_id. Callers rank candidates
+    # by ratings count, and many real titles normalise identically -- "Dune" and
+    # "Dune - The Official Comic Book" both key to "dune" -- so sorting on an
+    # opaque id here silently picked whichever book happened to hash lowest.
     scored.sort(key=lambda row: (-row[0], row[1]))
-    best_score, best_id, best_title, best_authors = scored[0]
+    best_score, _, best_id, best_title, best_authors = scored[0]
 
     if best_score < threshold:
         # Report how close it got: a caller can show "did you mean" without
@@ -261,7 +264,7 @@ def resolve_seed(
 
     near = [row for row in scored[:limit] if best_score - row[0] <= ambiguity_margin]
     alternatives = (
-        tuple((work_id, _label(title, authors)) for _, work_id, title, authors in near)
+        tuple((work_id, _label(title, authors)) for _, _, work_id, title, authors in near)
         if len(near) > 1
         else ()
     )

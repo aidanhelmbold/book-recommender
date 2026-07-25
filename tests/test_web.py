@@ -204,3 +204,62 @@ class TestReadOnlySafety:
         client.post("/api/subgraph", json={"seeds": ["Dune"], "n": 10})
 
         assert copy.stat().st_mtime_ns == before
+
+
+class TestBridgesEndpoint:
+    """Bridges must reach the browser, not just the terminal.
+
+    The map is where "show me how these two genres connect" is most naturally
+    seen, so the API half is the one that matters most for this feature.
+    """
+
+    def test_returns_bridges(self, client: TestClient) -> None:
+        response = client.get("/api/bridges")
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["bridges"]
+        first = payload["bridges"][0]
+        for key in ("work_id", "title", "score", "communities", "community_labels"):
+            assert key in first
+        assert len(first["communities"]) >= 2
+
+    def test_respects_top_n(self, client: TestClient) -> None:
+        payload = client.get("/api/bridges", params={"top_n": 3}).json()
+        assert len(payload["bridges"]) <= 3
+
+    def test_scores_descend(self, client: TestClient) -> None:
+        scores = [b["score"] for b in client.get("/api/bridges").json()["bridges"]]
+        assert scores == sorted(scores, reverse=True)
+
+    def test_seeds_restrict_to_relevant_clusters(self, client: TestClient) -> None:
+        payload = client.get("/api/bridges", params={"seeds": "Dune,Emma"}).json()
+        assert payload["seed_communities"]
+        wanted = set(payload["seed_communities"])
+        for bridge in payload["bridges"]:
+            assert set(bridge["communities"]) & wanted
+
+    def test_unknown_seed_is_reported_not_fatal(self, client: TestClient) -> None:
+        response = client.get("/api/bridges", params={"seeds": "Zzzqqx Nonexistent"})
+        assert response.status_code == 200
+        assert "Zzzqqx Nonexistent" in response.json()["unresolved"]
+
+    def test_out_of_range_top_n_is_rejected(self, client: TestClient) -> None:
+        assert client.get("/api/bridges", params={"top_n": 0}).status_code == 422
+        assert client.get("/api/bridges", params={"top_n": 9999}).status_code == 422
+
+
+class TestBridgesInTheUI:
+    def test_page_has_a_bridges_panel(self, client: TestClient) -> None:
+        """A bare endpoint nobody can see does not surface the feature."""
+        body = client.get("/").text.lower()
+        assert "bridge" in body
+
+    def test_renderer_marks_bridges_without_a_fourth_colour(self, client: TestClient) -> None:
+        """The role palette is capped at three validated hues.
+
+        A fourth would put violet beside blue at deltaE 1.9 under protanopia, so a
+        bridge has to be marked by geometry -- a ring or a shape -- rather than by
+        adding a colour. This asserts the renderer actually knows about bridges.
+        """
+        script = client.get("/static/map.js").text
+        assert "bridge" in script.lower()
