@@ -4,106 +4,119 @@ Give it a set of books you like. It gives you back books that suit the set as a
 whole — with a graph you can look at, and a reason for every recommendation.
 
 Under the hood it builds a network of book-to-book connections from Goodreads'
-"readers also enjoyed" lists and Amazon's "customers also bought" co-purchase
-data, then answers queries with network theory rather than a similarity lookup.
+"readers also enjoyed" lists and Amazon's "customers also bought" data, then
+answers queries with network theory rather than a similarity lookup.
 
 ```
-$ uv run bookmap recommend --seeds "Dune,Foundation,Hyperion" -n 5
+$ uv run bookmap recommend --seeds "Dune,Hyperion" -n 4
 
-  #   title                        author            score
-  1   The Left Hand of Darkness    Ursula K. Le Guin  0.052
-      ← 1 hop from Foundation, 2 from Dune
-  2   Blindsight                   Peter Watts        0.048
-      ← 2 hops from Hyperion, 2 from Dune
-  ...
+  1  I, Robot — Isaac Asimov  0.7000
+      ← directly linked to Hyperion
+      ← 2 hops from Dune via Foundation and Empire
+  2  Dune Messiah — Frank Herbert  0.6307
+  3  Foundation — Isaac Asimov  0.5600
+  4  Do Androids Dream of Electric Sheep? — Philip K. Dick  0.5526
+      ← 3 hops from Hyperion via Second Foundation, Ubik
 ```
+
+There is also an interactive map: `uv run bookmap web`.
+
+**Status:** complete and green — 393 tests, including scale tests over 20M-edge
+synthetic graphs. Verified on the bundled corpus, on a 100k-record slice of the
+real dump, and at synthetic scale. **A full 9.2 GB run has not yet completed end
+to end.** See `docs/todo.md` for open items and known compromises, and
+`docs/plan.md` for the design reasoning.
 
 ## Why a graph
 
-The obvious approach — take each seed, look up its similar books, merge the
-lists — answers the wrong question. It finds books similar to *Dune*, and books
-similar to *Foundation*, but nothing that is characteristically similar to the
-combination. A graph lets you ask the better question directly: start random
-walks from all your seeds at once and see where they concentrate.
+The obvious approach — take each seed, look up its similar books, merge the lists
+— answers the wrong question. It finds books similar to *Dune*, and books similar
+to *Foundation*, but nothing characteristically similar to the combination. A
+graph lets you ask the better question directly: start random walks from all your
+seeds at once and see where they concentrate.
 
-That is personalized PageRank (random walk with restart), and it naturally
-rewards books reachable from *several* seeds over books tied strongly to just
-one. Two further passes fix its known failure modes:
+That is personalized PageRank, and it naturally rewards books reachable from
+*several* seeds over books tied strongly to just one. Two further passes fix its
+known failure modes:
 
 - **Hub damping.** Undamped, PPR recommends bestsellers to everyone — a book
-  connected to 4,000 others accumulates walk probability regardless of
-  relevance. Dividing by `degree^β` corrects for that.
+  connected to 4,000 others accumulates walk probability regardless of relevance.
+  Dividing by `degree^β` corrects for it.
 - **Diversity reranking.** MMR over graph neighbourhoods stops the list
   collapsing into the single densest region your seeds touch.
 
-Because the recommendation *is* a path through a graph, every result comes with
-its justification: `← 2 hops from Hyperion, adjacent to Blindsight`. That is also
-how you spot a bad edge.
+Because a recommendation *is* a path through a graph, every result carries its
+justification — which is also how you spot a bad edge.
 
 ## Data sources
 
-There is no live API for this data any more. Goodreads retired its public API in
-December 2020, and Amazon's Product Advertising API no longer exposes
-similar-items. The available routes are published research dumps:
+There is no live API for this data. Goodreads retired its public API in December
+2020 and Amazon's Product Advertising API no longer exposes similar-items, so the
+route is published research dumps.
 
-| Source | What it contributes | Notes |
+| Source | Contributes | Notes |
 |---|---|---|
-| [UCSD Book Graph](https://mengtingwan.github.io/data/goodreads) | ~2.36M books with a native `similar_books` field — the Goodreads recommender's own output | Primary edge source. Research use; cite the papers. |
-| [SNAP `amazon-meta.txt`](https://snap.stanford.edu/data/amazon-meta.html) | Co-purchase `similar` ASINs | Books only; most of the file is DVDs and music. |
-| [Amazon Reviews 2023](https://amazon-reviews-2023.github.io/) | `also_buy` / `also_view` | Kept as distinct edge kinds — viewing together is much weaker evidence. |
-| [Open Library](https://openlibrary.org/developers/api) | Subjects, covers, years, canonical work ids | Public, keyless. Metadata enrichment, not behavioural edges. |
+| [UCSD Book Graph](https://mengtingwan.github.io/data/goodreads) | ~2.36M books with a native `similar_books` field — the Goodreads recommender's own output | Primary edge source. Verified working. |
+| [SNAP `amazon-meta.txt`](https://snap.stanford.edu/data/amazon-meta.html) | Co-purchase `similar` ASINs | Books only. Untested on real data. |
+| [Amazon Reviews 2023](https://amazon-reviews-2023.github.io/) | `also_buy` / `also_view` | Distinct edge kinds — viewing together is far weaker evidence. Untested on real data. |
+| [Open Library](https://openlibrary.org/developers/api) | Subjects, covers, years | Public, keyless. Enrichment, not behavioural edges. Untested against the live API. |
 
-**Licensing.** The Goodreads and Amazon dumps are released for research use.
-Check each dataset's terms before using them for anything else. `bookmap` ships
-no scraped data and includes no scraper — the dumps are the supported path.
-
-Both dumps are keyed differently (Goodreads ids versus ASINs), so nodes are
-canonicalised to *works* rather than editions; without that the fused graph would
-be two disconnected components describing the same books.
+**Licensing.** The Goodreads and Amazon dumps are released for research use; check
+each dataset's terms before other uses. `bookmap` ships no scraped data and
+contains no scraper.
 
 ## Install
 
-```
+```bash
 uv sync
 ```
 
 ## Quickstart, no download required
 
-A small hand-authored demo corpus ships with the repo so the whole pipeline runs
-immediately:
-
-```
+```bash
 uv run bookmap ingest demo
 uv run bookmap build
 uv run bookmap recommend --seeds "Dune,Foundation,Hyperion" -n 20
-uv run bookmap web          # interactive map at http://127.0.0.1:8000
+uv run bookmap web          # http://127.0.0.1:8000
 ```
 
-The demo corpus is **hand-authored, not scraped** — it is labelled as such in
-`data/demo/corpus.json`. It exists to make the code runnable and testable, not
-to stand in for real data.
+The demo corpus is **hand-authored, not scraped** — real titles, designed edges,
+labelled as such in `data/demo/corpus.json`. It exists to make the code runnable
+and testable, not to stand in for real data.
 
 ## The real graph
 
-```
-uv run bookmap ingest goodreads-ucsd ~/Downloads/goodreads_books.json.gz \
-    --authors ~/Downloads/goodreads_book_authors.json.gz
-uv run bookmap ingest amazon-meta ~/Downloads/amazon-meta.txt.gz
-uv run bookmap ingest openlibrary          # optional metadata enrichment
-uv run bookmap build --min-weight 0.05
+Full instructions, including a slice-first dry run, are in
+[`docs/ingest-runbook.md`](docs/ingest-runbook.md). The short version:
+
+```bash
+mkdir -p /tmp/bookmap-spill
+
+uv run bookmap ingest goodreads-ucsd data/dumps/goodreads_books.json.gz \
+    --authors data/dumps/goodreads_book_authors.json.gz \
+    --temp-dir /tmp/bookmap-spill --memory-limit 8GB --max-temp-size 20GB
+
+uv run bookmap build --temp-dir /tmp/bookmap-spill --memory-limit 8GB --max-temp-size 20GB
 uv run bookmap web
 ```
 
+Expect roughly **11 minutes** to ingest and a **2–3 GB** database. Gzip the dumps
+first — both readers and DuckDB handle `.gz`, and it saves about 7 GB of disk.
+
+The spill controls matter. DuckDB's default temp directory sits beside the
+database and its default cap is a fraction of the whole volume, so a query that
+spills can fill the disk and take the machine with it; naming a directory and a
+ceiling turns that into a query that fails quickly, saying which limit it hit.
+
 Ingest is resumable and idempotent — re-running a dump replaces rows rather than
-accumulating them, which matters because edge weights are sums over the raw edge
-table.
+accumulating them, which matters because edge weights are sums over the raw table.
 
 ## How connections are weighted
 
-List position carries real signal: being the first "customers also bought"
-result says far more than being the twentieth. And sources differ in quality —
-Goodreads' similar-books list is a curated recommender output, while Amazon
-co-purchase is noisy with bundles, gifts and course textbooks.
+List position carries real signal: being the first "customers also bought" result
+says far more than being the twentieth. Sources also differ in quality — Goodreads'
+similar-books list is a curated recommender output, while Amazon co-purchase is
+noisy with bundles, gifts and course textbooks.
 
 ```
 rank_w   = 1 / log2(2 + rank)
@@ -113,10 +126,18 @@ dir_asym = 1 − min/max                            az_also_viewed 0.1
                                                   ol_subject     0.05
 ```
 
-`dir_asym` preserves mutuality, which would otherwise be thrown away: 0.0 means
-both books list each other, 1.0 means the link runs one way only.
+`dir_asym` preserves mutuality that would otherwise be discarded: 0.0 means both
+books list each other, 1.0 means the link runs one way only.
 
 Every knob lives in `src/bookmap/config.py`.
+
+## Works, not editions
+
+A node is a **work**. The dump carries both `book_id` (the edition) and `work_id`
+(the work), and keying on the edition splits one book's evidence across every
+printing of it — the real dump has five *Dune* editions, and each was collecting a
+fifth of the signal. Nodes key on the work; each edition registers a
+`goodreads_id` alias so its edges land on the one node.
 
 ## Storage
 
@@ -124,7 +145,7 @@ One DuckDB file. The workload is bulk-load plus full-table analytical scan, whic
 is DuckDB's shape: `read_json` ingests the gzipped dump directly,
 `UNNEST(similar_books) WITH ORDINALITY` recovers list position without a Python
 loop, fusion is a single `GROUP BY`, and projection to SciPy hands Arrow buffers
-straight to NumPy instead of pulling 20M rows through a cursor on every build.
+straight to NumPy — 2M edges in about a second.
 
 Raw edges are kept immutable and separate from the fused graph, so fusion
 parameters can be retuned and the graph rebuilt without re-ingesting anything.
@@ -140,15 +161,20 @@ parameters can be retuned and the graph rebuilt without re-ingesting anything.
 | `bookmap web` | Interactive map server |
 | `bookmap stats` | Graph size, degree distribution, communities |
 
+Write-side commands take `--temp-dir`, `--memory-limit` and `--max-temp-size`.
+Read-side commands open the database read-only, so the web app is safe to leave
+running during a re-ingest.
+
 ## Development
 
-Built test-first: every component is pinned by tests written before its
-implementation, and most are checked against an independent oracle rather than a
-snapshot — `networkx.pagerank` for PPR, a planted-partition graph for community
-detection, hand-computed arithmetic for fusion weights, real ISBN check digits
-for identity resolution.
+Built test-first, and most components are checked against an **independent
+oracle** rather than a snapshot of their own output: `networkx.pagerank` for PPR,
+a planted-partition graph for community detection, hand-computed arithmetic for
+fusion weights, real ISBN check digits for identity resolution.
 
+```bash
+uv run pytest              # 393 tests
+uv run pytest -m slow      # scale tests: 20M-row resolution, 500k-node PPR
 ```
-uv run pytest              # unit, property, integration
-uv run pytest -m slow      # scale sanity (500k-node synthetic graphs)
-```
+
+See `CLAUDE.md` for conventions and the traps this dump sets.
