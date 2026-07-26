@@ -60,6 +60,16 @@ def find_connections(
             for match in matches
         ],
         "unresolved": list(unresolved),
+        # Resolved to a real book that has no node in the graph -- on the real
+        # corpus only ~26% of works carry a fused edge, so this is the common case
+        # rather than an exotic one. Kept distinct from `unresolved`: "we could not
+        # find that title" and "that book has no connections" send the reader to
+        # different places, and conflating them invites a hunt for a typo that
+        # isn't there.
+        "missing": [
+            {"work_id": work_id, "title": titles.get(work_id, work_id)}
+            for work_id in result.missing
+        ],
         "max_hops": max_hops,
         "skeletons": [_skeleton_payload(skeleton, titles) for skeleton in result.skeletons],
         # Present seeds that reached no other seed. Named explicitly because a

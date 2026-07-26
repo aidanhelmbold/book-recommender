@@ -1103,7 +1103,15 @@ def _print_connections(payload: dict[str, Any]) -> None:
             + markup_escape(", ".join(payload["unresolved"]))
         )
 
-    if len(payload["seeds"]) < 2:
+    if payload["missing"]:
+        # Distinct from "no match": these titles resolved, they simply have no
+        # edges in the built graph, so they cannot be on any route.
+        names = ", ".join(entry["title"] for entry in payload["missing"])
+        console.print(
+            f"[yellow]not in the graph (no connections):[/yellow] {markup_escape(names)}"
+        )
+
+    if len(payload["seeds"]) - len(payload["missing"]) < 2:
         console.print(
             "[yellow]name at least two books:[/yellow] a connection needs two ends, "
             "so there is nothing to connect here."

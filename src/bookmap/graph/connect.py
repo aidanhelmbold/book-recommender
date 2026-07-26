@@ -39,13 +39,19 @@ from bookmap.explain import edge_cost
 if TYPE_CHECKING:  # pragma: no cover
     from bookmap.store.projection import GraphProjection
 
-DEFAULT_MAX_HOPS = 6
+DEFAULT_MAX_HOPS = 8
 """Longest route reported as a connection between two seeds.
 
 A ten-hop chain through nine books nobody has heard of is technically a path and
 tells the reader nothing. Where the cap bites the pair is reported as *capped*
 rather than truncated: a shortened path is a false claim about the route, while
 "these two are further apart than N hops" is true and useful.
+
+Raised from 6 after measuring the real graph: *Dune* and *Pride and Prejudice*
+sit **7** hops apart, so a cap of 6 refused precisely the cross-genre query this
+feature exists to answer. Eight admits those routes while still excluding the
+ten-hop chains. The routes it admits are weak -- strength around 1e-4 -- but the
+reported strength says so, which is better than declining to answer.
 """
 
 _MIN_COST = 1e-12

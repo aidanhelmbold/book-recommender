@@ -70,12 +70,65 @@ because it happens to carry the one edge that crosses.
 The two-seed case reads much better (`Dune → The Dispossessed → Sapiens → Emma`,
 where *The Dispossessed* is a planted bridge), so this is not uniformly wrong.
 
-Worth measuring on the real 392k-node graph before changing anything: at that
-density there are many more candidate routes and the weak-link artefact may not
-survive. If it does, the lever the plan already suggests is applying hub damping
-to path costs; a floor on per-edge weight along a route is the other obvious
-candidate. Reported strength (0.0228) does at least make a weak route visibly
-weak, so nothing here is hidden from the reader.
+**Measured on the real 392k-node graph, and it survives.** The artefact is not a
+small-corpus effect:
+
+```
+Dune → The Neutronium Alchemist (Night's Dawn, #2) → Foundation   (2 hops, 0.0473)
+```
+
+*Dune* and *Foundation* are two of the most-linked SF novels in the corpus and
+there is no direct edge between them, so the route hangs off whichever single book
+appears in both similar-books lists. Book two of a Peter F. Hamilton trilogy is
+that book. It is a correct shortest path and a poor answer to "how do these
+connect" — nobody reaches *Foundation* through the *Night's Dawn* sequence.
+
+The three-way case shows the same shape more starkly: routing *Dune*, *Emma* and
+*Zen and the Art of Motorcycle Maintenance* puts **The Book of Deeds of Arms and of
+Chivalry** — an obscure medieval treatise — at the junction of both legs. The
+literary stepping stones around it (*Bleak House*, *The Count of Monte Cristo*,
+*Cat's Cradle*, *Cyrano de Bergerac*) read plausibly; the junction does not.
+
+So phase 4 is warranted. Two candidate levers, in order of promise:
+
+1. **Hub damping on path costs**, as the plan suggests — but note this artefact is
+   the *opposite* of a hub shortcut. The bad connectors are low-degree books
+   carrying one tenuous edge, so damping by degree would push routes *further*
+   toward them. Damping is likely the wrong lever here.
+2. **A floor on per-edge weight along a route.** Refusing any edge below, say,
+   0.15 would force routes onto links that are actually strong, at the cost of
+   declaring more pairs unreachable. This looks like the right lever and it is
+   cheap to try.
+
+A third option worth considering: rank routes by their *weakest* edge rather than
+the product (a maximin / widest-path objective instead of shortest-path). That
+directly optimises for "no tenuous link anywhere on the chain", which is what a
+reader actually wants, and it is still a single Dijkstra variant.
+
+Reported strength does at least make a weak route visibly weak (0.0473 against a
+direct edge's 0.13–0.38), so nothing is hidden from the reader.
+
+### A short title plus a truncated subtitle resolves to the wrong book
+Typing `Atomic Habits` against the real graph resolves to **"Atomic: An I Bring the
+Fire Short Story (A Loki Series)"**. The mechanism, and it is the same family as the
+*Foundation* → back-pain-manual bug:
+
+- `normalize_title` truncates at subtitle markers, so that title becomes `atomic`.
+- `fuzz.WRatio("atomic habits", "atomic")` is **0.90**, well over the 0.75
+  threshold, because WRatio matches partials so a query can find a long title.
+- Nothing else scores higher, because *Atomic Habits* (2018) postdates the 2017
+  UCSD dump and is genuinely **not in the corpus**.
+
+So the honest answer was "no match" and the user got a confident wrong one. The
+previous fix corrected which candidate wins a tie; this is a different defect — a
+short truncated title matching a longer query at high confidence.
+
+Candidate fix: penalise a candidate whose normalised title is a strict prefix of
+the query but much shorter, or require the ratio to hold against the *untruncated*
+title as well. Do not simply raise the threshold — 0.90 is high, and raising the
+bar far enough to exclude this would start rejecting legitimate partial queries
+like "harry potter". `tests/test_identity.py` has the ambiguous-title cases to
+extend, and the failing example above belongs in them.
 
 ### The canvas renderer has no automated tests
 `tests/test_web.py` covers every endpoint's contract and asserts that `map.js`
