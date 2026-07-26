@@ -248,7 +248,7 @@ canvas.dragging { cursor: grabbing; }
 /* Bridges are marked by geometry, never a fourth hue: the role palette is capped
    at three validated slots, and a fourth would put violet beside blue at deltaE
    1.9 under protanopia. A double ring is legible to everyone. */
-.bridges { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--border); }
+.bridges { margin: 0 0 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
 .bridges h3 { margin: 0 0 6px; font-size: 13px; font-weight: 600; }
 .bridges-note { margin: 0 0 10px; font-size: 12px; color: var(--text-muted); }
 #bridge-list { margin: 0; padding: 0 0 0 1.6em; display: flex; flex-direction: column; gap: 9px; }
