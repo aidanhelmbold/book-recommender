@@ -13,7 +13,6 @@ import pytest
 
 from bookmap.explain import edge_cost, explain_paths, format_explanation
 from bookmap.models import Book, Explanation, FusedEdge
-from tests.helpers import make_projection
 
 
 class TestEdgeCost:

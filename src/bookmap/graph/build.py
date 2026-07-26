@@ -121,7 +121,44 @@ def fuse_in_sql(store, config: GraphConfig | None = None) -> int:  # noqa: ANN00
     # A VALUES join rather than a CASE ladder: it supplies the per-kind trust
     # weight and drops kinds the config does not know about in one step.
     alpha_values = ", ".join(["(?, ?)"] * len(alpha))
+
+    # An edge survives only if *both* endpoints clear the ratings threshold:
+    # keeping an edge whose far end was filtered out would leave a dangling ref,
+    # and the projection would carry a node with no book behind it.
+    #
+    # `ratings_count IS NULL` passes deliberately. The dump reports the count as a
+    # string and frequently as "", which the adapters coerce to NULL rather than 0,
+    # so an unknown count must not be read as "no ratings" -- that would delete a
+    # large slice of the real corpus while looking like a working filter.
+    #
+    # A falsy threshold (None, or an explicit 0) omits the CTE entirely rather than
+    # emitting a tautology, so the default build pays nothing for this.
+    filtering = bool(config.min_ratings)
+    eligible_cte = (
+        """
+        eligible AS (
+            SELECT work_id FROM books
+            WHERE ratings_count IS NULL OR ratings_count >= ?
+        ),
+        """
+        if filtering
+        else ""
+    )
+    ratings_filter = (
+        """
+              AND e.src IN (SELECT work_id FROM eligible)
+              AND e.dst IN (SELECT work_id FROM eligible)
+        """
+        if filtering
+        else ""
+    )
+
+    # DuckDB binds ``?`` by position, so this list must follow the order the
+    # placeholders appear in the statement below: the eligible CTE, then the alpha
+    # pairs, then max_rank, then min_weight.
     params: list[object] = []
+    if filtering:
+        params.append(config.min_ratings)
     for kind, value in alpha.items():
         params.extend([str(kind), float(value)])
     params.extend([config.max_rank, config.min_weight])
@@ -129,7 +166,7 @@ def fuse_in_sql(store, config: GraphConfig | None = None) -> int:  # noqa: ANN00
     conn.execute(
         f"""
         INSERT INTO edges_fused (src, dst, weight, dir_asym, kinds)
-        WITH directed AS (
+        WITH {eligible_cte}directed AS (
             SELECT e.src AS src,
                    e.dst AS dst,
                    sum(a.alpha / log2(2 + e.rank)) AS w,
@@ -137,6 +174,7 @@ def fuse_in_sql(store, config: GraphConfig | None = None) -> int:  # noqa: ANN00
             FROM edges_raw e
             JOIN (VALUES {alpha_values}) AS a(kind, alpha) ON e.kind = a.kind
             WHERE e.rank <= ?
+            {ratings_filter}
             GROUP BY e.src, e.dst
         ),
         canonical AS (

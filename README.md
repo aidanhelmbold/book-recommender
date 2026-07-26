@@ -21,7 +21,7 @@ $ uv run bookmap recommend --seeds "Dune,Hyperion" -n 4
 
 There is also an interactive map: `uv run bookmap web`.
 
-**Status:** complete and green — 487 tests, including scale tests over 20M-edge
+**Status:** complete and green — 515 tests, including scale tests over 20M-edge
 synthetic graphs. Verified on the bundled corpus, on a 100k-record slice of the
 real dump, and at synthetic scale. **A full 9.2 GB run has not yet completed end
 to end.** See `docs/todo.md` for open items and known compromises, and
@@ -141,7 +141,8 @@ $ uv run bookmap connect --seeds "Dune,Emma"
 seed Dune — Frank Herbert
 seed Emma — Jane Austen
 
-Dune → The Dispossessed → Sapiens → Emma  (3 hops, strength 0.0012)
+Dune → The Dispossessed → Sapiens → Emma
+  3 hops · strength 0.0012 · weakest link 0.063
 
 connecting books
    1  Sapiens
@@ -169,9 +170,44 @@ because the role palette is capped at three hues — only three clear the
 colour-vision separation floors for a form where any two roles can end up adjacent
 (see `docs/plan.md`), so identity that cannot rest on position rests on geometry.
 
-Whether these routes read as *meaningful* or merely *short* is an open question on
-real data — `docs/todo.md` has the measurement so far, and it is more equivocal
-than the example above.
+### Choosing what "best route" means
+
+Measured on the real graph, the default objective has a real weakness: maximising
+the *product* of the edge weights will trade several strong links for one weak one,
+because a single 0.107 edge costs less than three 0.25 hops. Routes then hang off
+whichever tenuous link happens to exist — it put book two of a Peter F. Hamilton
+trilogy between *Dune* and *Foundation*.
+
+So every route reports its **weakest link** alongside its strength, and there are
+two levers:
+
+```
+--min-edge-weight 0.15   refuse to route through edges weaker than this
+--objective widest       maximise the weakest link, then take the shortest such route
+```
+
+`widest` is the same lever with the floor derived from the graph rather than
+guessed: the maximum spanning tree gives each pair's best possible bottleneck, and
+the weakest of those becomes the floor. It is lexicographic by necessity — pure
+maximin ignores length and produced a 38-hop route on the demo corpus.
+
+`--compare` runs all three on the same seeds so the difference is judgeable:
+
+```
+$ uv run bookmap connect --seeds "Dune,Emma" --compare
+— product —
+Dune → The Dispossessed → Sapiens → Emma
+  3 hops · strength 0.0012 · weakest link 0.063
+
+— widest —
+Dune → Do Androids Dream of Electric Sheep? → The Left Hand of Darkness →
+Beloved → Persuasion → Emma
+  5 hops · strength 0.0007 · weakest link 0.189
+```
+
+The second is longer and lower-probability, and it is the better answer. Which one
+is right in general is still open on real data; `docs/todo.md` carries the
+measurements.
 
 ## Works, not editions
 
@@ -203,6 +239,7 @@ parameters can be retuned and the graph rebuilt without re-ingesting anything.
 | `bookmap web` | Interactive map server |
 | `bookmap bridges` | Books linking two otherwise-separate reading communities |
 | `bookmap connect --seeds "A,B,C"` | The route between books, and what joins them |
+| `bookmap connect --compare` | The same route under each objective, side by side |
 | `bookmap stats` | Graph size, degree distribution, communities |
 
 Write-side commands take `--temp-dir`, `--memory-limit` and `--max-temp-size`.
@@ -217,7 +254,7 @@ a planted-partition graph for community detection, hand-computed arithmetic for
 fusion weights, real ISBN check digits for identity resolution.
 
 ```bash
-uv run pytest              # 487 tests
+uv run pytest              # 515 tests
 uv run pytest -m slow      # scale tests: 20M-row resolution, 500k-node PPR
 ```
 

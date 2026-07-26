@@ -447,3 +447,46 @@ class TestConnectionsOnTheSubgraph:
         payload = client.post("/api/subgraph", json={"seeds": ["Dune"], "n": 20}).json()
         assert payload["nodes"]
         assert payload["connectors"] == []
+
+
+class TestConnectionsObjectiveParams:
+    """The route objective is a real question on real data, so the API exposes it.
+
+    The default stays `product` because which objective reads better is still open
+    — but the endpoint must not lock a caller out of the alternative.
+    """
+
+    def test_widest_is_accepted(self, client: TestClient) -> None:
+        response = client.get(
+            "/api/connections", params={"seeds": "Dune,Emma", "objective": "widest"}
+        )
+        assert response.status_code == 200
+        assert response.json()["objective"] == "widest"
+
+    def test_an_unknown_objective_is_rejected(self, client: TestClient) -> None:
+        response = client.get(
+            "/api/connections", params={"seeds": "Dune,Emma", "objective": "cheapest-ish"}
+        )
+        assert response.status_code == 422
+
+    def test_a_weight_floor_is_accepted_and_echoed(self, client: TestClient) -> None:
+        payload = client.get(
+            "/api/connections",
+            params={"seeds": "Dune,Emma", "min_edge_weight": 0.15},
+        ).json()
+        assert payload["min_edge_weight"] == pytest.approx(0.15)
+        for skeleton in payload["skeletons"]:
+            for leg in skeleton["legs"]:
+                assert leg["bottleneck"] >= 0.15
+
+    def test_an_out_of_range_floor_is_rejected(self, client: TestClient) -> None:
+        for value in (-0.1, 1.5):
+            response = client.get(
+                "/api/connections", params={"seeds": "Dune,Emma", "min_edge_weight": value}
+            )
+            assert response.status_code == 422, value
+
+    def test_the_default_is_unchanged(self, client: TestClient) -> None:
+        payload = client.get("/api/connections", params={"seeds": "Dune,Emma"}).json()
+        assert payload["objective"] == "product"
+        assert payload["min_edge_weight"] == 0.0

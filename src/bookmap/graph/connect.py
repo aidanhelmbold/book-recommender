@@ -67,6 +67,39 @@ the floor is far below any distance the result is compared at.
 _NO_PREDECESSOR = -9999
 """SciPy's sentinel in a predecessor matrix. Any negative value means the same."""
 
+PRODUCT = "product"
+"""Maximise the product of the edge weights: minimise the sum of ``-log(w)``.
+
+The natural reading of "how probable is this chain of connections", and the
+original objective. Its weakness, found on the real graph, is that it will trade
+several strong links for one weak one — a single 0.107 edge costs 2.23 while three
+0.25 hops cost 4.2 — so the cheapest route hangs off whichever tenuous edge
+happens to exist.
+"""
+
+WIDEST = "widest"
+"""Maximise the weakest edge on the route, then take the shortest such route.
+
+Lexicographic, and it has to be. Pure maximin ignores length completely: on the
+177-book demo corpus it routed *Dune* to *Emma* in **38 hops**, wandering the
+spanning tree to avoid ever stepping down in weight. That answers "no tenuous
+link" and abandons "how do these connect", which is trading one pathology for
+another.
+
+So this runs in two phases. The **maximum spanning tree** gives the optimal
+bottleneck for each terminal pair exactly -- the minimax path between any two
+nodes runs along it. The weakest of those bottlenecks then becomes an edge-weight
+floor, and the ordinary product objective routes inside what survives. The result
+carries no link weaker than strictly necessary, and among those is the strongest
+chain.
+
+Which makes this the same lever as ``min_edge_weight``, with the floor *derived
+from the graph* rather than guessed: it is the highest floor that still joins
+these particular seeds.
+"""
+
+OBJECTIVES = (PRODUCT, WIDEST)
+
 
 @dataclass(frozen=True, slots=True)
 class Leg:
@@ -83,6 +116,16 @@ class Leg:
     strength: float
     """``exp(-cost)``: the product of the edge weights, so legs of different
     lengths are comparable as probabilities."""
+
+    bottleneck: float = 0.0
+    """The weakest single edge on the path.
+
+    Reported for every objective because it is the number that exposes the
+    weak-link artefact: a route can have a respectable product and still hang off
+    one tenuous edge, and the product alone cannot tell you which happened. A
+    2-hop leg at strength 0.047 reads as reasonable until you see that its
+    bottleneck is 0.107.
+    """
 
     @property
     def hops(self) -> int:
@@ -147,6 +190,11 @@ class Connections:
 
     capped: tuple[CappedPair, ...] = ()
     max_hops: int = DEFAULT_MAX_HOPS
+    objective: str = PRODUCT
+    """Which objective produced these routes. Reported so a caller comparing two
+    runs cannot mix them up."""
+
+    min_edge_weight: float = 0.0
 
     @property
     def nodes(self) -> tuple[str, ...]:
@@ -183,7 +231,9 @@ class Connections:
         return tuple(leg for skeleton in self.skeletons for leg in skeleton.legs)
 
 
-def cost_matrix(projection: GraphProjection) -> sp.csr_matrix:
+def cost_matrix(
+    projection: GraphProjection, *, min_edge_weight: float = 0.0
+) -> sp.csr_matrix:
     """The adjacency re-expressed as shortest-path costs, ``-log(weight)``.
 
     A vectorised restatement of :func:`bookmap.explain.edge_cost`, not a second
@@ -197,12 +247,86 @@ def cost_matrix(projection: GraphProjection) -> sp.csr_matrix:
     that still costs memory and comparisons on every relaxation.
     """
     adjacency = sp.csr_matrix(projection.adjacency).tocoo()
-    keep = adjacency.data > 0.0
+    # Dropped, not penalised. A floored edge must be genuinely impassable, or the
+    # floor becomes a suggestion the router can overrule when nothing else works.
+    keep = adjacency.data > max(0.0, min_edge_weight - _MIN_COST)
     costs = np.maximum(-np.log(adjacency.data[keep]), _MIN_COST)
     return sp.csr_matrix(
         (costs, (adjacency.row[keep], adjacency.col[keep])),
         shape=adjacency.shape,
     )
+
+
+def _widest_costs(projection: GraphProjection, costs: sp.csr_matrix) -> sp.csr_matrix:
+    """Restrict the graph to its maximum spanning tree.
+
+    The minimax (widest) path between two nodes runs along the maximum spanning
+    tree, so once the graph is restricted to that tree the unique remaining path
+    *is* the widest path — no separate relaxation is needed and the rest of the
+    pipeline is unchanged. On a disconnected graph this yields a forest, which is
+    the right answer for a graph that genuinely has several components.
+
+    SciPy only computes *minimum* spanning trees, so the weights are negated;
+    ``costs`` is then reindexed onto the surviving edges, keeping ``-log(weight)``
+    as the reported cost so that ``strength`` still means the same thing.
+    """
+    adjacency = sp.csr_matrix(projection.adjacency).tocoo()
+    # Restricted to the edges the floor already admitted, so the two knobs
+    # compose: a floored edge must not reappear via the tree.
+    admitted = sp.csr_matrix(
+        (np.ones(costs.nnz), costs.nonzero()), shape=costs.shape
+    ).tocoo()
+    live = {(int(i), int(j)) for i, j in zip(admitted.row, admitted.col, strict=True)}
+    mask = np.fromiter(
+        ((int(i), int(j)) in live for i, j in zip(adjacency.row, adjacency.col)),
+        dtype=bool,
+        count=adjacency.nnz,
+    )
+    negated = sp.csr_matrix(
+        (-adjacency.data[mask], (adjacency.row[mask], adjacency.col[mask])),
+        shape=adjacency.shape,
+    )
+    tree = minimum_spanning_tree(negated).tocoo()
+
+    rows = np.concatenate([tree.row, tree.col])
+    cols = np.concatenate([tree.col, tree.row])
+    weights = np.concatenate([-tree.data, -tree.data])
+    return sp.csr_matrix(
+        (np.maximum(-np.log(weights), _MIN_COST), (rows, cols)), shape=adjacency.shape
+    )
+
+
+def _weakest_necessary(
+    projection: GraphProjection, tree_costs: sp.csr_matrix, rows: np.ndarray
+) -> float:
+    """The lowest optimal-bottleneck across all terminal pairs, or 0.0 if none join.
+
+    Phase one of :data:`WIDEST`. Each pair's tree path is bottleneck-optimal, so
+    the weakest edge on it is the best that pair can do; the minimum over pairs is
+    then the highest floor that still leaves every joinable pair joinable. Pairs in
+    separate components contribute nothing -- they are unreachable at any floor.
+    """
+    adjacency = sp.csr_matrix(projection.adjacency)
+    distances, predecessors = dijkstra(
+        tree_costs, directed=False, indices=rows, return_predecessors=True
+    )
+
+    weakest = math.inf
+    for i in range(len(rows)):
+        for j in range(i + 1, len(rows)):
+            if not np.isfinite(distances[i][rows[j]]):
+                continue
+            walk = _walk(predecessors[i], int(rows[i]), int(rows[j]))
+            if walk is None:
+                continue
+            weakest = min(
+                weakest,
+                min(
+                    _weight(adjacency, u, v)
+                    for u, v in zip(walk, walk[1:], strict=False)
+                ),
+            )
+    return 0.0 if math.isinf(weakest) else weakest
 
 
 def metric_closure(
@@ -247,13 +371,27 @@ def connect_seeds(
     terminals: list[str] | tuple[str, ...],
     *,
     max_hops: int = DEFAULT_MAX_HOPS,
+    objective: str = PRODUCT,
+    min_edge_weight: float = 0.0,
 ) -> Connections:
     """Find the minimal structure joining ``terminals``, via KMB.
 
     Returns one :class:`Skeleton` per group of mutually reachable terminals --
     the real graph is not connected, so several groups is the normal case, not an
     error -- plus the seeds that are missing, unjoinable, or too far apart.
+
+    ``objective`` selects what "best route" means: :data:`PRODUCT` maximises the
+    product of the edge weights, :data:`WIDEST` maximises the weakest edge on the
+    route. ``min_edge_weight`` drops tenuous edges before routing and composes with
+    either. Both exist because the product objective was measured on the real graph
+    and found to route through single weak edges.
     """
+    if objective not in OBJECTIVES:
+        # Rejected rather than defaulted: a run reported under the wrong objective
+        # is worse than one that failed, since the whole point is comparing them.
+        raise ValueError(
+            f"unknown objective {objective!r}; expected one of {OBJECTIVES}"
+        )
     wanted: dict[str, int] = {}
     missing: list[str] = []
     for work_id in terminals:
@@ -267,7 +405,13 @@ def connect_seeds(
             wanted[work_id] = row
 
     present = tuple(wanted)
-    base = Connections(terminals=present, missing=tuple(missing), max_hops=max_hops)
+    base = Connections(
+        terminals=present,
+        missing=tuple(missing),
+        max_hops=max_hops,
+        objective=objective,
+        min_edge_weight=min_edge_weight,
+    )
     if len(wanted) < 2:
         # Nothing to connect. Not an error: one seed is a legitimate query, it
         # simply has no route to anywhere else in it.
@@ -275,7 +419,17 @@ def connect_seeds(
     if max_hops < 1:
         return Connections(**{**_fields(base), "unjoined": present})
 
-    costs = cost_matrix(projection)
+    costs = cost_matrix(projection, min_edge_weight=min_edge_weight)
+    floor = min_edge_weight
+    if objective == WIDEST:
+        rows = np.fromiter(wanted.values(), dtype=np.int64, count=len(wanted))
+        floor = max(
+            floor,
+            _weakest_necessary(projection, _widest_costs(projection, costs), rows),
+        )
+        # Re-derive rather than mask the tree: the route must be free to leave the
+        # spanning tree, which is what keeps it short once the floor is fixed.
+        costs = cost_matrix(projection, min_edge_weight=floor)
     rows = np.fromiter(wanted.values(), dtype=np.int64, count=len(wanted))
     # One C-level pass per terminal over the whole graph. This is the only step
     # that touches all 392k nodes, and paths reconstruct from ``predecessors``
@@ -308,6 +462,8 @@ def connect_seeds(
         unjoined=tuple(work_id for work_id in present if work_id in set(unjoined)),
         capped=tuple(capped),
         max_hops=max_hops,
+        objective=objective,
+        min_edge_weight=floor,
     )
 
 
@@ -319,6 +475,8 @@ def _fields(result: Connections) -> dict[str, object]:
         "unjoined": result.unjoined,
         "capped": result.capped,
         "max_hops": result.max_hops,
+        "objective": result.objective,
+        "min_edge_weight": result.min_edge_weight,
     }
 
 
@@ -414,10 +572,13 @@ def _skeleton(
         walk = paths[(i, j)] if (i, j) in paths else list(reversed(paths[(j, i)]))
         for row in walk:
             union.setdefault(row, None)
-        cost = sum(
-            edge_cost(_weight(adjacency, u, v))
-            for u, v in zip(walk, walk[1:], strict=False)
-        )
+        # The real fused weights, not the routed costs: under the widest objective
+        # the router works over a spanning tree, but a leg's cost and strength must
+        # describe the actual edges so the two objectives stay comparable.
+        step_weights = [
+            _weight(adjacency, u, v) for u, v in zip(walk, walk[1:], strict=False)
+        ]
+        cost = sum(edge_cost(weight) for weight in step_weights)
         legs.append(
             Leg(
                 source=work_ids[walk[0]],
@@ -425,6 +586,7 @@ def _skeleton(
                 path=tuple(work_ids[row] for row in walk),
                 cost=cost,
                 strength=math.exp(-cost),
+                bottleneck=min(step_weights) if step_weights else 0.0,
             )
         )
 

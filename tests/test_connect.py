@@ -428,3 +428,121 @@ class TestDeterminism:
         assert {frozenset((u, v)) for u, v, _ in forward.edges} == {
             frozenset((u, v)) for u, v, _ in backward.edges
         }
+
+
+class TestRouteObjectives:
+    """Two levers for the weak-link artefact found on the real graph.
+
+    Minimising the sum of ``-log(weight)`` maximises the *product* of the edge
+    weights, which is the right objective for "how probable is this chain" and the
+    wrong one for "is any link on it tenuous". One 0.107 edge costs 2.23 while three
+    0.25 hops cost 4.2, so the cheapest route hangs off whichever single weak edge
+    exists — on the real graph that put book two of a Peter F. Hamilton trilogy
+    between *Dune* and *Foundation*.
+
+    Both levers are tested against the same discriminating graph, where the two
+    objectives provably disagree, plus a brute-force oracle over every simple path.
+    """
+
+    # Direct link at 0.3 against a two-hop route at 0.5 each.
+    #   product:  0.3   >  0.5 * 0.5 = 0.25   -> direct
+    #   widest:   0.3   <  min(0.5, 0.5)      -> via mid
+    # No tie-break decides this; the objectives genuinely disagree.
+    SPLIT_PAIRS = [("a", "b", 0.3), ("a", "mid", 0.5), ("mid", "b", 0.5)]
+
+    @staticmethod
+    def _widest_by_brute_force(pairs, source, target) -> float:
+        """The bottleneck of the best path, by enumerating every simple path.
+
+        Exponential and therefore test-only, but it is a genuine independent
+        oracle: it knows nothing about spanning trees or Dijkstra.
+        """
+        graph = nx.Graph()
+        for u, v, w in pairs:
+            graph.add_edge(u, v, weight=w)
+        return max(
+            min(graph[u][v]["weight"] for u, v in zip(path, path[1:], strict=False))
+            for path in nx.all_simple_paths(graph, source, target)
+        )
+
+    def test_product_is_the_default_and_takes_the_direct_link(self) -> None:
+        projection = make_projection(self.SPLIT_PAIRS)
+        skeleton = connect_seeds(projection, ["a", "b"]).skeletons[0]
+        assert skeleton.connectors == ()
+        assert skeleton.legs[0].strength == pytest.approx(0.3)
+
+    def test_widest_takes_the_route_with_no_weak_link(self) -> None:
+        projection = make_projection(self.SPLIT_PAIRS)
+        result = connect_seeds(projection, ["a", "b"], objective="widest")
+        skeleton = result.skeletons[0]
+        assert [node for node in skeleton.connectors] == ["mid"]
+        assert skeleton.legs[0].bottleneck == pytest.approx(0.5)
+
+    def test_widest_matches_the_brute_force_oracle(self) -> None:
+        projection = make_projection(CHAIN_PAIRS)
+        for source, target in (("sf2", "phil2"), ("sf1", "lit2"), ("gateway", "phil1")):
+            leg = connect_seeds(
+                projection, [source, target], objective="widest"
+            ).skeletons[0].legs[0]
+            expected = self._widest_by_brute_force(CHAIN_PAIRS, source, target)
+            assert leg.bottleneck == pytest.approx(expected), (source, target)
+
+    def test_bottleneck_is_the_weakest_edge_on_the_leg(self) -> None:
+        """Reported for every objective: it is the number that exposes the artefact."""
+        projection = make_projection(CHAIN_PAIRS)
+        weights = {frozenset((u, v)): w for u, v, w in CHAIN_PAIRS}
+        for leg in connect_seeds(projection, ["sf2", "phil2"]).legs:
+            expected = min(
+                weights[frozenset((u, v))]
+                for u, v in zip(leg.path, leg.path[1:], strict=False)
+            )
+            assert leg.bottleneck == pytest.approx(expected)
+
+    def test_a_weight_floor_refuses_the_weak_edge(self) -> None:
+        """The other lever: drop tenuous edges before routing at all."""
+        pairs = [
+            ("a", "weak", 0.1), ("weak", "b", 0.9),      # product-cheapest
+            ("a", "s1", 0.4), ("s1", "s2", 0.4), ("s2", "b", 0.4),  # all-strong
+        ]
+        projection = make_projection(pairs)
+        # Without a floor the weak two-hop route wins: 0.1 * 0.9 = 0.09 against
+        # 0.4^3 = 0.064.
+        assert "weak" in connect_seeds(projection, ["a", "b"]).skeletons[0].nodes
+
+        floored = connect_seeds(projection, ["a", "b"], min_edge_weight=0.15)
+        skeleton = floored.skeletons[0]
+        assert "weak" not in skeleton.nodes
+        assert set(skeleton.connectors) == {"s1", "s2"}
+        assert skeleton.legs[0].bottleneck >= 0.15
+
+    def test_a_floor_can_leave_a_pair_unreachable(self) -> None:
+        """Honest outcome, not a fallback to the weak route.
+
+        Quietly routing through an edge the caller excluded would make the floor a
+        suggestion rather than a constraint.
+        """
+        projection = make_projection([("a", "weak", 0.1), ("weak", "b", 0.1)])
+        result = connect_seeds(projection, ["a", "b"], min_edge_weight=0.15)
+        assert result.skeletons == ()
+        assert set(result.unjoined) == {"a", "b"}
+
+    def test_the_floor_applies_under_the_widest_objective_too(self) -> None:
+        projection = make_projection([("a", "weak", 0.1), ("weak", "b", 0.1)])
+        result = connect_seeds(
+            projection, ["a", "b"], objective="widest", min_edge_weight=0.15
+        )
+        assert result.skeletons == ()
+
+    def test_an_unknown_objective_is_rejected(self) -> None:
+        """Silently falling back to a different objective would misreport the run."""
+        projection = make_projection(self.SPLIT_PAIRS)
+        with pytest.raises(ValueError, match="objective"):
+            connect_seeds(projection, ["a", "b"], objective="cheapest-ish")
+
+    def test_the_objective_is_reported_back(self) -> None:
+        projection = make_projection(self.SPLIT_PAIRS)
+        assert connect_seeds(projection, ["a", "b"]).objective == "product"
+        assert (
+            connect_seeds(projection, ["a", "b"], objective="widest").objective
+            == "widest"
+        )

@@ -14,7 +14,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from bookmap.graph.connect import DEFAULT_MAX_HOPS, Connections, connect_seeds
+from bookmap.graph.connect import (
+    DEFAULT_MAX_HOPS,
+    PRODUCT,
+    Connections,
+    connect_seeds,
+)
 from bookmap.recommend import resolve_seeds
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -32,6 +37,8 @@ def find_connections(
     *,
     seeds: list[str],
     max_hops: int = DEFAULT_MAX_HOPS,
+    objective: str = PRODUCT,
+    min_edge_weight: float = 0.0,
 ) -> dict[str, Any]:
     """Resolve ``seeds``, find the skeleton joining them, and name every node.
 
@@ -46,7 +53,13 @@ def find_connections(
     # Resolution order is the order the user typed, and the skeleton preserves it,
     # so the report reads back in the same order.
     terminals = [match.work_id for match in matches if match.work_id is not None]
-    result = connect_seeds(projection, terminals, max_hops=max_hops)
+    result = connect_seeds(
+        projection,
+        terminals,
+        max_hops=max_hops,
+        objective=objective,
+        min_edge_weight=min_edge_weight,
+    )
     titles = _titles(store, result, matches)
 
     return {
@@ -71,6 +84,8 @@ def find_connections(
             for work_id in result.missing
         ],
         "max_hops": max_hops,
+        "objective": objective,
+        "min_edge_weight": min_edge_weight,
         "skeletons": [_skeleton_payload(skeleton, titles) for skeleton in result.skeletons],
         # Present seeds that reached no other seed. Named explicitly because a
         # partial answer presented as a whole one is the failure mode here.
@@ -118,6 +133,7 @@ def _skeleton_payload(skeleton: Any, titles: dict[str, str]) -> dict[str, Any]:
                 "hops": leg.hops,
                 "cost": leg.cost,
                 "strength": leg.strength,
+                "bottleneck": leg.bottleneck,
             }
             for leg in skeleton.legs
         ],

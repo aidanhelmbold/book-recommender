@@ -113,3 +113,74 @@ class TestConnectCommand:
             app, ["connect", "--seeds", "Dune,Emma", "--db", str(tmp_path / "nope.duckdb")]
         )
         assert result.exit_code != 0
+
+
+class TestRouteObjectiveOptions:
+    """The comparison has to be runnable from the command line, on one screen.
+
+    Judging two objectives by running two commands and scrolling between them is
+    how you end up comparing different seed resolutions by accident.
+    """
+
+    def test_widest_objective_runs(self, built_db: Path) -> None:
+        result = runner.invoke(
+            app,
+            ["connect", "--seeds", "Dune,Emma", "--db", str(built_db),
+             "--objective", "widest"],
+        )
+        assert result.exit_code == 0, result.output
+        assert "→" in result.output
+
+    def test_an_unknown_objective_fails_cleanly(self, built_db: Path) -> None:
+        result = runner.invoke(
+            app,
+            ["connect", "--seeds", "Dune,Emma", "--db", str(built_db),
+             "--objective", "cheapest-ish"],
+        )
+        assert result.exit_code != 0
+        assert "cheapest-ish" in result.output or "objective" in result.output.lower()
+
+    def test_a_weight_floor_is_accepted(self, built_db: Path) -> None:
+        result = runner.invoke(
+            app,
+            ["connect", "--seeds", "Dune,Emma", "--db", str(built_db),
+             "--min-edge-weight", "0.15"],
+        )
+        assert result.exit_code == 0, result.output
+
+    def test_the_bottleneck_is_reported(self, built_db: Path) -> None:
+        """The number that exposes a weak link must be on screen, not just in JSON."""
+        result = runner.invoke(app, ["connect", "--seeds", "Dune,Emma", "--db", str(built_db)])
+        assert "weakest" in result.output.lower()
+
+    def test_compare_shows_every_variant_together(self, built_db: Path) -> None:
+        result = runner.invoke(
+            app, ["connect", "--seeds", "Dune,Emma", "--db", str(built_db), "--compare"]
+        )
+        assert result.exit_code == 0, result.output
+        lowered = result.output.lower()
+        for label in ("product", "widest", "floor"):
+            assert label in lowered, label
+
+    def test_compare_names_the_objective_of_each_block(self, built_db: Path) -> None:
+        """Unlabelled blocks are the whole failure mode of a comparison."""
+        payload = runner.invoke(
+            app,
+            ["connect", "--seeds", "Dune,Emma", "--db", str(built_db),
+             "--compare", "--json"],
+        )
+        assert payload.exit_code == 0, payload.output
+        variants = json.loads(payload.output)["variants"]
+        assert [v["label"] for v in variants] == ["product", "product + floor", "widest"]
+        for variant in variants:
+            assert "skeletons" in variant
+
+    def test_json_carries_the_bottleneck(self, built_db: Path) -> None:
+        payload = json.loads(
+            runner.invoke(
+                app, ["connect", "--seeds", "Dune,Emma", "--db", str(built_db), "--json"]
+            ).output
+        )
+        leg = payload["skeletons"][0]["legs"][0]
+        assert 0.0 < leg["bottleneck"] <= 1.0
+        assert payload["objective"] == "product"

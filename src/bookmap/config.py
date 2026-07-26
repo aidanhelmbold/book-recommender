@@ -38,6 +38,17 @@ class GraphConfig:
     """Ignore list positions beyond this — the tail of an "also bought" list is
     mostly unrelated inventory."""
 
+    min_ratings: int | None = None
+    """Drop edges touching books with fewer than this many ratings.
+
+    The long tail carries thin, unreliable ``similar_books`` lists, so cutting it
+    yields a smaller graph and arguably better recommendations. ``None`` disables
+    the filter entirely, which is distinct from ``0``: a book whose rating count is
+    *unknown* is kept at any threshold, because the dump reports blanks and
+    treating "we do not know" as "none" would silently delete a large slice of the
+    real corpus.
+    """
+
 
 @dataclass(frozen=True, slots=True)
 class RecommendConfig:

@@ -24,7 +24,7 @@ comes with a path back to a seed.
 - Comments explain **why**, not what.
 
 ```
-uv run pytest                 # 487 tests, all green
+uv run pytest                 # 515 tests, all green
 uv run pytest -m slow         # scale tests (minutes; 20M-row synthetic graphs)
 ```
 

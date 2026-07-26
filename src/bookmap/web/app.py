@@ -25,7 +25,7 @@ from pydantic import BaseModel, Field
 from bookmap.bridges import BridgesUnavailable, find_bridges
 from bookmap.config import LayoutConfig, RecommendConfig
 from bookmap.connections import ConnectionsUnavailable, find_connections
-from bookmap.graph.connect import DEFAULT_MAX_HOPS
+from bookmap.graph.connect import DEFAULT_MAX_HOPS, OBJECTIVES, PRODUCT
 from bookmap.graph.layout import force_atlas2, normalize_positions
 from bookmap.recommend import recommend as run_recommend
 from bookmap.store.db import Store
@@ -401,6 +401,8 @@ def create_app(db_path: str = "bookmap.duckdb") -> FastAPI:
     def connections_endpoint(
         seeds: str = Query("", description="Comma-separated titles to join."),
         max_hops: int = Query(DEFAULT_MAX_HOPS, ge=1, le=20),
+        objective: str = Query(PRODUCT, description='"product" or "widest".'),
+        min_edge_weight: float = Query(0.0, ge=0.0, le=1.0),
     ) -> dict[str, Any]:
         """The minimal structure joining the seeds, for the map's overlay.
 
@@ -412,10 +414,20 @@ def create_app(db_path: str = "bookmap.duckdb") -> FastAPI:
         wanted = [part.strip() for part in seeds.split(",") if part.strip()]
         if not wanted:
             raise HTTPException(status_code=422, detail="seeds must name at least one book")
+        if objective not in OBJECTIVES:
+            raise HTTPException(
+                status_code=422,
+                detail=f"unknown objective {objective!r}; expected one of {OBJECTIVES}",
+            )
         with lock:
             try:
                 return find_connections(
-                    store, projection, seeds=wanted, max_hops=max_hops
+                    store,
+                    projection,
+                    seeds=wanted,
+                    max_hops=max_hops,
+                    objective=objective,
+                    min_edge_weight=min_edge_weight,
                 )
             except ConnectionsUnavailable as exc:
                 # Readable database, unbuilt graph: the caller's to fix with

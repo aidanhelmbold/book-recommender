@@ -20,7 +20,6 @@ import gzip
 import json
 from pathlib import Path
 
-import pytest
 
 from bookmap.sources.base import split_ref
 from bookmap.sources.goodreads_ucsd import GoodreadsUCSDSource

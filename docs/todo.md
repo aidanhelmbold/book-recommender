@@ -29,18 +29,25 @@ working on real data.
 
 ## Known gaps
 
-### `--min-ratings` is not implemented
-Intended as a way to drop the long tail — obscure books have thin, unreliable
-`similar_books` edges, so filtering them yields a smaller graph and arguably
-better recommendations. The agent implementing it was cut off before starting.
+### `--min-ratings` needs judging on real data
+Implemented as `bookmap build --min-ratings N`: an edge survives only if **both**
+endpoints clear the threshold, so filtering a book also removes the edges pointing
+at it rather than leaving dangling refs.
 
-Workaround: `--max-rank 10` cuts edges roughly threefold, and rank decay means
-positions 11–50 contribute little anyway. Use the same value for `ingest` **and**
-`build`; a mismatch silently changes the graph.
+A book whose `ratings_count` is **unknown** is kept at any threshold. The dump
+reports the count as a string and frequently as `""`, which the adapters coerce to
+NULL, and reading "we do not know" as "none" would delete a large slice of the real
+corpus while looking like a working filter. `--min-ratings 0` is therefore a no-op,
+not a filter on NULL.
 
-When implementing: `ratings_count` arrives as a *string* and is frequently `""`.
-An absent count must not be silently treated as 0 and excluded. Filtering must
-also drop edges pointing at excluded books rather than leave dangling refs.
+Two things still open:
+- **It does nothing on the demo corpus.** All 177 hand-authored books have no
+  rating count, so every threshold is a no-op there. A test pins that, because the
+  alternative — emptying the graph — is the silent failure to guard against.
+- **No threshold has been judged on the real graph.** Try `--min-ratings 50` and
+  `500` and compare `bookmap stats` node counts and recommendation quality. Use
+  `--max-rank 10` alongside it if the graph is still too large; rank decay means
+  positions 11–50 contribute little.
 
 ### Community labels do not handle non-English stopwords
 The real dump is heavily multilingual, and slice labels included bare `de` and
@@ -89,21 +96,42 @@ Chivalry** — an obscure medieval treatise — at the junction of both legs. Th
 literary stepping stones around it (*Bleak House*, *The Count of Monte Cristo*,
 *Cat's Cradle*, *Cyrano de Bergerac*) read plausibly; the junction does not.
 
-So phase 4 is warranted. Two candidate levers, in order of promise:
+Note that **hub damping — the lever the plan proposed — is the wrong one here.**
+This artefact is the opposite of a hub shortcut: the bad connectors are *low-degree*
+books carrying one tenuous edge (*Revelation Space* has degree 8), so damping by
+degree would push routes further toward them.
 
-1. **Hub damping on path costs**, as the plan suggests — but note this artefact is
-   the *opposite* of a hub shortcut. The bad connectors are low-degree books
-   carrying one tenuous edge, so damping by degree would push routes *further*
-   toward them. Damping is likely the wrong lever here.
-2. **A floor on per-edge weight along a route.** Refusing any edge below, say,
-   0.15 would force routes onto links that are actually strong, at the cost of
-   declaring more pairs unreachable. This looks like the right lever and it is
-   cheap to try.
+**Two levers are now implemented; which to adopt is still open.** Every route
+reports its `weakest link`, and `--compare` runs all three on the same seeds:
 
-A third option worth considering: rank routes by their *weakest* edge rather than
-the product (a maximin / widest-path objective instead of shortest-path). That
-directly optimises for "no tenuous link anywhere on the chain", which is what a
-reader actually wants, and it is still a single Dijkstra variant.
+- `--min-edge-weight 0.15` — refuse edges below a floor.
+- `--objective widest` — maximise the weakest link, then take the shortest such
+  route. Lexicographic by necessity: pure maximin ignores length and routed *Dune*
+  to *Emma* in **38 hops** on the demo corpus. The maximum spanning tree gives each
+  pair's best possible bottleneck and the weakest of those becomes the floor, which
+  makes this the same lever with the threshold *derived* rather than guessed.
+
+On the demo corpus both clearly improve the routes:
+
+```
+product          Dune → The Dispossessed → Sapiens → Emma
+                 3 hops · strength 0.0012 · weakest link 0.063
+widest           Dune → Do Androids Dream of Electric Sheep? → The Left Hand of
+                 Darkness → Beloved → Persuasion → Emma
+                 5 hops · strength 0.0007 · weakest link 0.189
+```
+
+The second is longer and lower-probability and is plainly the better answer, which
+is the case against the product objective as a default.
+
+**What is still needed:** the same comparison on the real 392k-node graph. Two
+things to watch there. First, whether `widest` derives a *usable* floor — on a
+graph with 5.1M edges the weakest necessary link across a seed set may be so low
+that the floor does nothing. Second, cost: `widest` adds a maximum spanning tree
+over the whole graph plus a second Dijkstra pass, which is untimed at real scale
+and may be too slow for a web request even if it is fine for the CLI. Neither
+`--objective` nor `--min-edge-weight` changes any default yet, precisely because
+that decision needs the real numbers.
 
 Reported strength does at least make a weak route visibly weak (0.0473 against a
 direct edge's 0.13–0.38), so nothing is hidden from the reader.

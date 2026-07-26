@@ -25,7 +25,7 @@ from rich.table import Table
 
 from bookmap.config import DEFAULT_DB_PATH, GraphConfig, LayoutConfig, RecommendConfig
 from bookmap.explain import format_explanation
-from bookmap.graph.connect import DEFAULT_MAX_HOPS
+from bookmap.graph.connect import DEFAULT_MAX_HOPS, OBJECTIVES, PRODUCT, WIDEST
 from bookmap.identity import normalize_title
 from bookmap.recommend import RecommendResult
 from bookmap.recommend import recommend as run_recommend
@@ -461,6 +461,11 @@ def build(
     min_weight: float = 0.05,
     drop_leaves: bool = False,
     max_rank: int = 50,
+    min_ratings: int | None = typer.Option(
+        None,
+        "--min-ratings",
+        help="Drop books with fewer ratings than this. Unknown counts are kept.",
+    ),
     communities: bool = True,
     betweenness: bool = False,
     temp_dir: str | None = TEMP_DIR_OPT,
@@ -473,7 +478,12 @@ def build(
     from bookmap.graph.communities import community_sizes, detect_communities, label_communities
     from bookmap.store.projection import project
 
-    config = GraphConfig(min_weight=min_weight, drop_leaves=drop_leaves, max_rank=max_rank)
+    config = GraphConfig(
+        min_weight=min_weight,
+        drop_leaves=drop_leaves,
+        max_rank=max_rank,
+        min_ratings=min_ratings,
+    )
     with _open_writable(db, **_resources(temp_dir, memory_limit, max_temp_size)) as store:
         with console.status("fusing edges…"):
             # fuse_in_sql replaces edges_fused wholesale, which is what makes a
@@ -1055,6 +1065,21 @@ def connect(
         "--max-hops",
         help="Longest route to report between two books.",
     ),
+    objective: str = typer.Option(
+        PRODUCT,
+        "--objective",
+        help='"product" maximises the chain probability; "widest" maximises the weakest link.',
+    ),
+    min_edge_weight: float = typer.Option(
+        0.0,
+        "--min-edge-weight",
+        help="Refuse to route through edges weaker than this. Try 0.15.",
+    ),
+    compare: bool = typer.Option(
+        False,
+        "--compare",
+        help="Run every objective on the same seeds and print them together.",
+    ),
     json_out: bool = typer.Option(False, "--json", help="Emit JSON instead of prose."),
 ) -> None:
     """Show how a set of books connects, and name the books doing the joining.
@@ -1071,26 +1096,74 @@ def connect(
     queries = _split_seeds(seeds)
     if not queries:
         _fail("--seeds must name at least one book")
+    if objective not in OBJECTIVES:
+        _fail(f"unknown --objective {objective!r}; expected one of {', '.join(OBJECTIVES)}")
+
+    # Label, objective, floor. The floor variant is included in a comparison
+    # because it is the other candidate lever, and judging it against a separately
+    # invoked run risks comparing different seed resolutions.
+    variants: list[tuple[str, str, float]] = (
+        [
+            ("product", PRODUCT, 0.0),
+            ("product + floor", PRODUCT, _COMPARE_FLOOR),
+            ("widest", WIDEST, 0.0),
+        ]
+        if compare
+        else [(objective, objective, min_edge_weight)]
+    )
 
     with _open_readable(db) as store:
         projection = project(store)
-        try:
-            payload = find_connections(
-                store, projection, seeds=queries, max_hops=max_hops
-            )
-        except ConnectionsUnavailable as exc:
-            _fail(str(exc))
-            raise  # unreachable
+        results = []
+        for label, mode, floor in variants:
+            try:
+                payload = find_connections(
+                    store,
+                    projection,
+                    seeds=queries,
+                    max_hops=max_hops,
+                    objective=mode,
+                    min_edge_weight=floor,
+                )
+            except ConnectionsUnavailable as exc:
+                _fail(str(exc))
+                raise  # unreachable
+            results.append({"label": label, **payload})
 
     if json_out:
         # Nothing else may reach stdout in this mode: the output is parsed.
-        typer.echo(json.dumps(payload, indent=2))
+        body = {"variants": results} if compare else results[0]
+        typer.echo(json.dumps(body, indent=2))
         return
 
-    _print_connections(payload)
+    if not compare:
+        _print_connections(results[0])
+        return
+
+    # Seeds resolve identically across variants, so they are printed once rather
+    # than three times -- and printing them once is also the evidence that the
+    # comparison really is on the same books.
+    _print_seed_lines(results[0])
+    for result in results:
+        console.print(f"\n[bold]— {result['label']} —[/bold]")
+        _print_routes(result)
+
+
+_COMPARE_FLOOR = 0.15
+"""Edge-weight floor used by ``--compare``.
+
+Chosen from the real graph: fused ``gr_similar`` weights run about 0.13 (rank 20)
+to 0.38 (rank 1), so 0.15 excludes the bottom of the rank tail without cutting
+into ordinary links. It is a starting point for judgement, not a tuned value.
+"""
 
 
 def _print_connections(payload: dict[str, Any]) -> None:
+    _print_seed_lines(payload)
+    _print_routes(payload)
+
+
+def _print_seed_lines(payload: dict[str, Any]) -> None:
     for seed in payload["seeds"]:
         author = ", ".join(seed["authors"])
         label = f"{seed['title']} — {author}" if author else seed["title"]
@@ -1111,6 +1184,8 @@ def _print_connections(payload: dict[str, Any]) -> None:
             f"[yellow]not in the graph (no connections):[/yellow] {markup_escape(names)}"
         )
 
+
+def _print_routes(payload: dict[str, Any]) -> None:
     if len(payload["seeds"]) - len(payload["missing"]) < 2:
         console.print(
             "[yellow]name at least two books:[/yellow] a connection needs two ends, "
@@ -1124,9 +1199,15 @@ def _print_connections(payload: dict[str, Any]) -> None:
             # The quotable form. Titles rather than ids, and the whole route on one
             # line, because this is the sentence people repeat back.
             route = " → ".join(markup_escape(title) for title in leg["titles"])
+            console.print(route)
+            # On its own line: an eight-hop route through real titles is far wider
+            # than a terminal, and trailing the numbers behind it wraps them into
+            # the middle of a word.
             console.print(
-                f"{route}  [dim]({leg['hops']} hops, "
-                f"strength {leg['strength']:.4f})[/dim]"
+                f"  [dim]{leg['hops']} hops · strength {leg['strength']:.4f} · "
+                # The weakest link is what exposes a route hanging off one tenuous
+                # edge, which the product alone cannot show.
+                f"weakest link {leg['bottleneck']:.3f}[/dim]"
             )
 
         if skeleton["connectors"]:
