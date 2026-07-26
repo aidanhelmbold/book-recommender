@@ -21,7 +21,7 @@ $ uv run bookmap recommend --seeds "Dune,Hyperion" -n 4
 
 There is also an interactive map: `uv run bookmap web`.
 
-**Status:** complete and green — 403 tests, including scale tests over 20M-edge
+**Status:** complete and green — 487 tests, including scale tests over 20M-edge
 synthetic graphs. Verified on the bundled corpus, on a 100k-record slice of the
 real dump, and at synthetic scale. **A full 9.2 GB run has not yet completed end
 to end.** See `docs/todo.md` for open items and known compromises, and
@@ -131,6 +131,48 @@ books list each other, 1.0 means the link runs one way only.
 
 Every knob lives in `src/bookmap/config.py`.
 
+## What sits *between* your books
+
+Recommendation answers "what is near these". A graph can answer a question a
+ranked list cannot: **how do these books connect to each other?**
+
+```
+$ uv run bookmap connect --seeds "Dune,Emma"
+seed Dune — Frank Herbert
+seed Emma — Jane Austen
+
+Dune → The Dispossessed → Sapiens → Emma  (3 hops, strength 0.0012)
+
+connecting books
+   1  Sapiens
+   2  The Dispossessed
+```
+
+The books in the middle are the answer, and they are exactly the ones a similarity
+search cannot return — a book joining SF to Regency romance is by definition not
+among the most similar to either side. Finding them is the *Steiner tree in graphs*
+problem: the minimum-weight subtree spanning a set of terminals, free to route
+through intermediate nodes. It is NP-hard, so this uses the standard
+Kou–Markowsky–Berman 2-approximation, with edge cost `-log(weight)` so that summing
+costs multiplies probabilities and the cheapest route is the *strongest chain of
+links* rather than merely the shortest one. Two strong hops beat one weak direct
+edge, which a hop count would get backwards.
+
+Because the real graph is disconnected, the result is one skeleton per group of
+mutually reachable seeds, and seeds that could not be joined — or that turned out
+further apart than the hop cap — are named rather than quietly omitted.
+
+In the web app this is the **Connections** view: the skeleton is added to the map
+(not substituted for it), its spine drawn heavy while the neighbourhood recedes,
+and connecting books marked with a diamond. A diamond rather than a fourth colour
+because the role palette is capped at three hues — only three clear the
+colour-vision separation floors for a form where any two roles can end up adjacent
+(see `docs/plan.md`), so identity that cannot rest on position rests on geometry.
+
+Whether these routes read as *meaningful* or merely *short* is an open question on
+real data — `docs/todo.md` has the measurement so far, and it is more equivocal
+than the example above.
+
 ## Works, not editions
 
 A node is a **work**. The dump carries both `book_id` (the edition) and `work_id`
@@ -160,6 +202,7 @@ parameters can be retuned and the graph rebuilt without re-ingesting anything.
 | `bookmap map --seeds "A,B" --out map.html` | Standalone HTML map |
 | `bookmap web` | Interactive map server |
 | `bookmap bridges` | Books linking two otherwise-separate reading communities |
+| `bookmap connect --seeds "A,B,C"` | The route between books, and what joins them |
 | `bookmap stats` | Graph size, degree distribution, communities |
 
 Write-side commands take `--temp-dir`, `--memory-limit` and `--max-temp-size`.
@@ -174,7 +217,7 @@ a planted-partition graph for community detection, hand-computed arithmetic for
 fusion weights, real ISBN check digits for identity resolution.
 
 ```bash
-uv run pytest              # 403 tests
+uv run pytest              # 487 tests
 uv run pytest -m slow      # scale tests: 20M-row resolution, 500k-node PPR
 ```
 

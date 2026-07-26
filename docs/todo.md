@@ -49,27 +49,46 @@ to contrast against each other, so this may resolve itself on the full graph —
 judge from real full-run labels before adding a stopword list, since a hardcoded
 English list would be the wrong fix for a multilingual corpus.
 
-### Bridge books are CLI-only, not in the web app
-`bookmap bridges` works, but the web front end has no bridges endpoint and no UI
-for them — `web/app.py` has never heard of the feature. Since the map is where
-"show me how these two genres connect" is most naturally *seen*, this is the more
-valuable half and it is the half that is missing.
+### Connection routes take one weak edge over a chain of strong ones
+This is `docs/plan-connections.md` phase 4, now measurable. The plan predicted
+routes would degenerate into **hub shortcuts** — a megaseller adjacent to
+everything. On the demo corpus that is not what happens; something adjacent is:
 
-Sketched so it is cheap to pick up:
+```
+Dune → Revelation Space → Atomic Habits   (2 hops, strength 0.0228)
+Emma → The Duchess Deal  → Atomic Habits  (2 hops, strength 0.0163)
+```
 
-- `GET /api/bridges?seeds=…&top_n=…` — the logic already exists; lift the body of
-  the `bridges` CLI command into a shared helper rather than duplicating it, since
-  the community-reading and over-fetch-then-filter behaviour is easy to get subtly
-  wrong twice.
-- Surface in the map as a **fourth role**. Careful: the role palette is capped at
-  three hues because only three clear the colour-vision separation floors for an
-  all-pairs form (see `docs/plan.md`). So a bridge must be marked by *shape or
-  ring*, not a new colour — a diamond, or a second concentric ring like seeds
-  already carry — with the legend row and tooltip carrying the identity.
-- A sidebar panel listing bridges for the current seeds, clicking one to centre it
-  on the map, is probably more useful than any on-canvas treatment.
-- Test as with the others: endpoint contract via `TestClient`, plus a real-browser
-  check that the mark is distinguishable from a seed in both themes.
+Both routes are arithmetically correct — `0.214 × 0.1069 = 0.0229`, and the edges
+are real hand-authored corpus edges — and neither connector is a hub (degree 8 and
+10, against Sapiens at 58). What is happening is that **one weak edge is cheaper
+than several strong ones**: `-log(0.107)` is 2.23, while three 0.25-weight hops
+cost 4.2. So the cheapest route hangs off whichever single tenuous link exists,
+and *Revelation Space* is named not because it connects SF to self-help but
+because it happens to carry the one edge that crosses.
+
+The two-seed case reads much better (`Dune → The Dispossessed → Sapiens → Emma`,
+where *The Dispossessed* is a planted bridge), so this is not uniformly wrong.
+
+Worth measuring on the real 392k-node graph before changing anything: at that
+density there are many more candidate routes and the weak-link artefact may not
+survive. If it does, the lever the plan already suggests is applying hub damping
+to path costs; a floor on per-edge weight along a route is the other obvious
+candidate. Reported strength (0.0228) does at least make a weak route visibly
+weak, so nothing here is hidden from the reader.
+
+### The canvas renderer has no automated tests
+`tests/test_web.py` covers every endpoint's contract and asserts that `map.js`
+mentions the concepts it must handle, but nothing executes the renderer. The
+drawing code — collision-avoided labels, diamond connectors, the emphasis pass for
+the connections view — has only ever been verified by loading the page in
+Chromium by hand and reading the screenshots in both themes.
+
+That is how the label-overlap bug was found (`Emma` rendering as `Em` beneath
+`The Duchess Deal`) and it would not have been caught any other way. `playwright`
+is deliberately *not* a declared dependency, so those checks are manual and do not
+run in the suite. `docs/plan-cicd.md` part 1 specs the `web` job that would fix
+this; until it exists, changes to `map.js` need a browser and a pair of eyes.
 
 ### Amazon and Open Library paths are untested on real data
 Both adapters are unit-tested against fixtures in the real formats, but no SNAP

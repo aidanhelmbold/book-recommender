@@ -263,3 +263,187 @@ class TestBridgesInTheUI:
         """
         script = client.get("/static/map.js").text
         assert "bridge" in script.lower()
+
+
+class TestConnectionsEndpoint:
+    """The route between the seeds, as data the map can overlay.
+
+    Same payload the CLI prints, because both go through
+    ``bookmap.connections.find_connections`` -- two surfaces disagreeing about how
+    two books connect would be worse than either being absent.
+    """
+
+    def test_returns_a_skeleton(self, client: TestClient) -> None:
+        response = client.get("/api/connections", params={"seeds": "Dune,Emma"})
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["skeletons"], payload
+        skeleton = payload["skeletons"][0]
+        for key in ("terminals", "connectors", "nodes", "edges", "legs", "cost"):
+            assert key in skeleton
+
+    def test_legs_carry_titles_alongside_ids(self, client: TestClient) -> None:
+        """The client needs both: ids to re-query with, titles to display."""
+        leg = client.get(
+            "/api/connections", params={"seeds": "Dune,Emma"}
+        ).json()["skeletons"][0]["legs"][0]
+        assert len(leg["path"]) == len(leg["titles"])
+        assert all(title for title in leg["titles"])
+        assert leg["hops"] == len(leg["path"]) - 1
+
+    def test_edges_reference_nodes_on_the_skeleton(self, client: TestClient) -> None:
+        """The renderer draws these directly; an edge to a node it was never sent
+        would be dropped silently and the route would look broken."""
+        skeleton = client.get(
+            "/api/connections", params={"seeds": "Dune,Emma"}
+        ).json()["skeletons"][0]
+        ids = {node["work_id"] for node in skeleton["nodes"]}
+        for edge in skeleton["edges"]:
+            assert edge["source"] in ids
+            assert edge["target"] in ids
+
+    def test_connectors_are_named_and_are_not_seeds(self, client: TestClient) -> None:
+        skeleton = client.get(
+            "/api/connections", params={"seeds": "Dune,Emma"}
+        ).json()["skeletons"][0]
+        terminals = {node["work_id"] for node in skeleton["terminals"]}
+        for connector in skeleton["connectors"]:
+            assert connector["title"]
+            assert connector["work_id"] not in terminals
+
+    def test_a_single_seed_is_not_an_error(self, client: TestClient) -> None:
+        response = client.get("/api/connections", params={"seeds": "Dune"})
+        assert response.status_code == 200
+        assert response.json()["skeletons"] == []
+
+    def test_unknown_seed_is_reported_not_fatal(self, client: TestClient) -> None:
+        response = client.get(
+            "/api/connections", params={"seeds": "Dune,Emma,Zzzqqx Nonexistent"}
+        )
+        assert response.status_code == 200
+        payload = response.json()
+        assert "Zzzqqx Nonexistent" in payload["unresolved"]
+        assert payload["skeletons"], "the resolvable seeds should still be joined"
+
+    def test_no_seeds_is_rejected(self, client: TestClient) -> None:
+        assert client.get("/api/connections", params={"seeds": " , "}).status_code == 422
+
+    def test_hop_cap_is_reported_not_hidden(self, client: TestClient) -> None:
+        payload = client.get(
+            "/api/connections", params={"seeds": "Dune,Emma", "max_hops": 1}
+        ).json()
+        assert payload["capped"], payload
+        pair = payload["capped"][0]
+        assert pair["limit"] == 1
+        assert pair["hops"] > 1
+        assert pair["source_title"] and pair["target_title"]
+
+    def test_out_of_range_max_hops_is_rejected(self, client: TestClient) -> None:
+        for value in (0, 999):
+            response = client.get(
+                "/api/connections", params={"seeds": "Dune,Emma", "max_hops": value}
+            )
+            assert response.status_code == 422, value
+
+
+class TestConnectionsInTheUI:
+    def test_the_page_offers_a_connections_view(self, client: TestClient) -> None:
+        """An endpoint nobody can reach does not surface the feature."""
+        body = client.get("/").text.lower()
+        assert "connection" in body
+
+    def test_the_renderer_marks_connectors_by_shape(self, client: TestClient) -> None:
+        """Not by a fourth hue.
+
+        The role palette is capped at three validated slots; a ring is taken by
+        seeds and a double ring by bridges, so a connector gets the remaining
+        geometric slot. Colour must not be the carrier.
+        """
+        script = client.get("/static/map.js").text.lower()
+        assert "connector" in script
+        assert "diamond" in script
+
+
+class TestConnectionsOnTheSubgraph:
+    """The skeleton has to reach the *layout*, not just the sidebar.
+
+    This is the whole point of the feature: connector books are excluded from the
+    neighbourhood by construction -- a book joining SF to Regency romance is not
+    among the most similar to either side -- so unless the subgraph explicitly
+    carries them, the lobes stay apart no matter what the force layout does. And
+    once the cross-lobe edges are really there, the layout arranges the clusters
+    along the connecting spine by itself.
+    """
+
+    def test_connector_nodes_are_on_the_map(self, client: TestClient) -> None:
+        route = client.get("/api/connections", params={"seeds": "Dune,Emma"}).json()
+        connectors = {
+            node["work_id"]
+            for skeleton in route["skeletons"]
+            for node in skeleton["connectors"]
+        }
+        assert connectors, "no connectors to check"
+        payload = client.post(
+            "/api/subgraph", json={"seeds": ["Dune", "Emma"], "n": 30}
+        ).json()
+        drawn = {node["work_id"] for node in payload["nodes"]}
+        assert connectors <= drawn, connectors - drawn
+
+    def test_the_payload_names_its_connectors(self, client: TestClient) -> None:
+        """The renderer marks connectors by shape, so it must know which they are."""
+        payload = client.post(
+            "/api/subgraph", json={"seeds": ["Dune", "Emma"], "n": 30}
+        ).json()
+        assert payload["connectors"]
+        drawn = {node["work_id"] for node in payload["nodes"]}
+        assert set(payload["connectors"]) <= drawn
+
+    def test_skeleton_edges_are_drawable(self, client: TestClient) -> None:
+        payload = client.post(
+            "/api/subgraph", json={"seeds": ["Dune", "Emma"], "n": 30}
+        ).json()
+        assert payload["skeleton_edges"]
+        drawn = {node["work_id"] for node in payload["nodes"]}
+        for edge in payload["skeleton_edges"]:
+            assert edge["src"] in drawn
+            assert edge["dst"] in drawn
+
+    def test_routes_carry_a_quotable_sentence(self, client: TestClient) -> None:
+        payload = client.post(
+            "/api/subgraph", json={"seeds": ["Dune", "Emma"], "n": 30}
+        ).json()
+        assert payload["routes"]
+        route = payload["routes"][0]
+        assert len(route["titles"]) >= 2
+        assert route["hops"] == len(route["titles"]) - 1
+
+    def test_connectors_keep_the_three_hue_palette(self, client: TestClient) -> None:
+        """A connector must not introduce a fourth role colour.
+
+        Only three categorical hues clear the colour-vision floors for an
+        all-pairs form, so a connector's identity rides on geometry and its fill
+        stays one of the three existing roles.
+        """
+        payload = client.post(
+            "/api/subgraph", json={"seeds": ["Dune", "Emma"], "n": 30}
+        ).json()
+        roles = {node["role"] for node in payload["nodes"]}
+        assert roles <= {"seed", "recommendation", "context"}
+
+    def test_connections_can_be_switched_off(self, client: TestClient) -> None:
+        """The neighbourhood view must stay exactly what it was.
+
+        The skeleton is an overlay; a caller asking for the plain neighbourhood
+        must not silently get extra nodes in it.
+        """
+        payload = client.post(
+            "/api/subgraph",
+            json={"seeds": ["Dune", "Emma"], "n": 30, "include_connections": False},
+        ).json()
+        assert payload["connectors"] == []
+        assert payload["skeleton_edges"] == []
+
+    def test_a_single_seed_still_renders(self, client: TestClient) -> None:
+        payload = client.post("/api/subgraph", json={"seeds": ["Dune"], "n": 20}).json()
+        assert payload["nodes"]
+        assert payload["connectors"] == []

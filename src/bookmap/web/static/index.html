@@ -32,6 +32,15 @@
         <input id="same-author" type="checkbox">
         <span>Exclude same author</span>
       </label>
+      <!-- A view switch rather than a second map: the recommendations stay the
+           primary output, and the skeleton is an emphasis pass over the same
+           picture. Radios, not a toggle button, so the current view is readable
+           without inferring it from a pressed state. -->
+      <fieldset class="views">
+        <legend>View</legend>
+        <label><input type="radio" name="view" value="neighbourhood" checked><span>Neighbourhood</span></label>
+        <label><input type="radio" name="view" value="connections"><span>Connections</span></label>
+      </fieldset>
       <button type="button" id="theme" aria-label="Toggle light and dark theme">Theme</button>
     </div>
   </header>
@@ -56,6 +65,9 @@
           <li data-role="seed"><span class="swatch swatch-seed"></span>Your books</li>
           <li data-role="recommendation"><span class="swatch swatch-rec"></span>Recommended</li>
           <li data-role="context"><span class="swatch swatch-ctx"></span>Nearby context</li>
+          <!-- Shape, not a fourth hue: a connector's fill stays one of the three
+               validated roles and the diamond is what identifies it. -->
+          <li data-role="connector" hidden><span class="swatch swatch-connector"></span>Connecting book</li>
         </ul>
         <div id="clusters" class="clusters"></div>
         <div class="canvas-wrap">
@@ -68,6 +80,20 @@
     </section>
 
     <aside class="list-pane">
+      <!-- Above the bridges, which are above the recommendations: this is the
+           answer to a question the ranked list cannot address at all, and a panel
+           below twenty results is a panel nobody scrolls to. -->
+      <section id="connections" class="connections" hidden>
+        <h3>How these books connect</h3>
+        <p class="connections-note">
+          The cheapest chain of links between the books you named. The books in
+          the middle are the ones doing the joining — marked on the map with a
+          diamond.
+        </p>
+        <ul id="route-list" class="routes"></ul>
+        <ol id="connector-list"></ol>
+      </section>
+
       <section id="bridges" class="bridges" hidden>
         <h3>Bridges between your genres</h3>
         <p class="bridges-note">

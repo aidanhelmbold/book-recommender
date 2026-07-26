@@ -256,3 +256,52 @@ canvas.dragging { cursor: grabbing; }
 #bridge-list li:hover .b-title { text-decoration: underline; }
 .b-title { font-weight: 500; }
 .b-connects { display: block; font-size: 12px; color: var(--text-secondary); }
+
+/* Views sit with the other controls rather than over the canvas: this is a
+   filter on what the chart emphasises, and filters belong in one row above. */
+.views {
+  display: flex;
+  gap: 4px 12px;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.views legend {
+  float: left;
+  padding: 0 8px 0 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.views label { display: flex; gap: 6px; align-items: center; cursor: pointer; font-size: 12px; color: var(--text-secondary); }
+
+/* A connector is marked by geometry, never a fourth hue -- the palette is capped
+   at three validated slots, a ring is taken by seeds and a double ring by
+   bridges, so the diamond is the remaining distinguishable slot. The swatch is a
+   rotated square in a text token so the legend matches the canvas mark without
+   claiming a colour of its own. */
+.swatch-connector {
+  border-radius: 0;
+  background: var(--text-secondary);
+  transform: rotate(45deg);
+  box-shadow: 0 0 0 2px var(--surface-1);
+}
+
+.connections { margin: 0 0 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+.connections h3 { margin: 0 0 6px; font-size: 13px; font-weight: 600; }
+.connections-note { margin: 0 0 10px; font-size: 12px; color: var(--text-muted); }
+
+/* The route is the sentence people quote, so it gets to be the prominent thing
+   in the panel and wraps rather than truncating. */
+.routes { margin: 0 0 12px; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.routes li { font-size: 13px; line-height: 1.5; }
+.route-path { font-weight: 500; }
+.route-meta { display: block; font-size: 12px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+
+#connector-list { margin: 0; padding: 0 0 0 1.6em; display: flex; flex-direction: column; gap: 7px; }
+#connector-list li { cursor: pointer; font-size: 13px; }
+#connector-list li:hover { text-decoration: underline; }
+
+.route-note { margin: 8px 0 0; font-size: 12px; color: var(--text-muted); }

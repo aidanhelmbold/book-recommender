@@ -24,6 +24,8 @@ from pydantic import BaseModel, Field
 
 from bookmap.bridges import BridgesUnavailable, find_bridges
 from bookmap.config import LayoutConfig, RecommendConfig
+from bookmap.connections import ConnectionsUnavailable, find_connections
+from bookmap.graph.connect import DEFAULT_MAX_HOPS
 from bookmap.graph.layout import force_atlas2, normalize_positions
 from bookmap.recommend import recommend as run_recommend
 from bookmap.store.db import Store
@@ -48,6 +50,13 @@ class SubgraphRequest(BaseModel):
     seeds: list[str] = Field(..., min_length=1)
     n: int = Field(40, ge=1, le=400)
     include_neighbors: bool = True
+    include_connections: bool = True
+    """Add the Steiner skeleton joining the seeds to the laid-out subgraph.
+
+    On by default because without it the connecting books are *absent*, not
+    merely unhighlighted: selection by relevance excludes exactly the nodes that
+    would join two genres, so the lobes cannot be drawn together at all.
+    """
 
 
 def _book_json(book) -> dict[str, Any]:  # noqa: ANN001 - bookmap.models.Book
@@ -92,6 +101,7 @@ def build_subgraph_payload(
     store: Store,
     *,
     include_neighbors: bool = True,
+    required: list[str] | None = None,
     config: LayoutConfig | None = None,
 ) -> dict[str, Any]:
     """Assemble the node/edge/position JSON the canvas renderer consumes.
@@ -99,6 +109,11 @@ def build_subgraph_payload(
     ``scored`` maps recommendation ids to their score; seeds carry no score.
     Neighbours of seeds are pulled in as context so the map shows a
     neighbourhood rather than a disconnected scatter of results.
+
+    ``required`` nodes are included whatever their score -- the connectors on the
+    Steiner skeleton, which by construction rank nowhere near the top and would
+    otherwise be trimmed away. They are ordered directly after the seeds because
+    the trim below is a prefix cut.
 
     Trimmed to ``config.max_nodes`` before layout: the force simulation is
     O(n^2) per iteration and, more importantly, a few hundred labelled circles is
@@ -113,7 +128,12 @@ def build_subgraph_payload(
     seen: set[str] = set()
     # Seeds first, then results, then context: the trim below is a prefix cut, so
     # ordering here is what decides who survives it.
-    for work_id in [*seed_ids, *sorted(scored, key=lambda key: -scored[key])]:
+    ordered = [
+        *seed_ids,
+        *(required or []),
+        *sorted(scored, key=lambda key: -scored[key]),
+    ]
+    for work_id in ordered:
         if work_id in projection.index and work_id not in seen:
             seen.add(work_id)
             members.append(work_id)
@@ -204,6 +224,8 @@ def create_app(db_path: str = "bookmap.duckdb") -> FastAPI:
       ``POST /api/subgraph``           nodes with layout positions, edges, communities
       ``GET  /api/book/{work_id}``     one book's details
       ``GET  /api/book/{id}/neighbors``click-to-expand
+      ``GET  /api/bridges``            books linking two reading communities
+      ``GET  /api/connections``        the route joining a set of books
       ``GET  /api/stats``              graph summary
 
     Unknown seeds return 200 with them listed under ``unresolved`` rather than
@@ -283,14 +305,47 @@ def create_app(db_path: str = "bookmap.duckdb") -> FastAPI:
             result = run_recommend(request.seeds, store, projection, n=request.n)
             seed_ids = [m.work_id for m in result.seeds if m.work_id]
             scored = {r.work_id: r.score for r in result.recommendations}
+
+            route: dict[str, Any] = {}
+            if request.include_connections:
+                route = find_connections(store, projection, seeds=request.seeds)
+
+            skeleton_nodes = [
+                node["work_id"]
+                for skeleton in route.get("skeletons", [])
+                for node in skeleton["nodes"]
+            ]
             payload = build_subgraph_payload(
                 seed_ids,
                 scored,
                 projection,
                 store,
                 include_neighbors=request.include_neighbors,
+                required=skeleton_nodes,
             )
+
+        drawn = {node["work_id"] for node in payload["nodes"]}
         payload["unresolved"] = list(result.unresolved)
+        payload["connectors"] = [
+            node["work_id"]
+            for skeleton in route.get("skeletons", [])
+            for node in skeleton["connectors"]
+            if node["work_id"] in drawn
+        ]
+        # Confined to what was actually laid out. An edge naming a node the client
+        # never received is silently dropped by the renderer, which reads as a
+        # broken route rather than a trimmed one.
+        payload["skeleton_edges"] = [
+            {"src": edge["source"], "dst": edge["target"], "weight": edge["weight"]}
+            for skeleton in route.get("skeletons", [])
+            for edge in skeleton["edges"]
+            if edge["source"] in drawn and edge["target"] in drawn
+        ]
+        payload["routes"] = [
+            {"titles": leg["titles"], "hops": leg["hops"], "strength": leg["strength"]}
+            for skeleton in route.get("skeletons", [])
+            for leg in skeleton["legs"]
+        ]
         return payload
 
     @app.get("/api/book/{work_id}")
@@ -340,6 +395,31 @@ def create_app(db_path: str = "bookmap.duckdb") -> FastAPI:
             try:
                 return find_bridges(store, projection, seeds=wanted or None, top_n=top_n)
             except BridgesUnavailable as exc:
+                raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+    @app.get("/api/connections")
+    def connections_endpoint(
+        seeds: str = Query("", description="Comma-separated titles to join."),
+        max_hops: int = Query(DEFAULT_MAX_HOPS, ge=1, le=20),
+    ) -> dict[str, Any]:
+        """The minimal structure joining the seeds, for the map's overlay.
+
+        Fewer than two resolvable seeds is a 200 with no skeletons rather than an
+        error: one book is a legitimate query that simply has no route in it, and
+        the client falls back to the neighbourhood view. An empty ``seeds`` is a
+        422, because that is a malformed request rather than an empty answer.
+        """
+        wanted = [part.strip() for part in seeds.split(",") if part.strip()]
+        if not wanted:
+            raise HTTPException(status_code=422, detail="seeds must name at least one book")
+        with lock:
+            try:
+                return find_connections(
+                    store, projection, seeds=wanted, max_hops=max_hops
+                )
+            except ConnectionsUnavailable as exc:
+                # Readable database, unbuilt graph: the caller's to fix with
+                # `bookmap build`, so 409 rather than 500.
                 raise HTTPException(status_code=409, detail=str(exc)) from exc
 
     @app.get("/api/stats")

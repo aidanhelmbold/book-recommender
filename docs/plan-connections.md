@@ -1,6 +1,13 @@
 # Plan: show how unrelated genres actually connect
 
-**Status:** proposed, not started.
+**Status:** phases 1–3 implemented — `graph/connect.py`, `bookmap connect`,
+`GET /api/connections`, and the map overlay with the Neighbourhood/Connections
+toggle. Phase 4 (the route-quality question) is measured on the demo corpus and
+open on real data; see the "Connection routes take one weak edge" entry in
+`docs/todo.md`. The design below stands as written; the one departure is that
+`connect_seeds` returns a `Connections` carrying **one skeleton per reachable
+group** rather than a single tree, because the real graph is disconnected and that
+was the honest shape for "say which seeds could not be joined".
 
 ## The question the map cannot currently answer
 

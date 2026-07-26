@@ -24,7 +24,7 @@ comes with a path back to a seed.
 - Comments explain **why**, not what.
 
 ```
-uv run pytest                 # 403 tests, all green
+uv run pytest                 # 487 tests, all green
 uv run pytest -m slow         # scale tests (minutes; 20M-row synthetic graphs)
 ```
 
@@ -38,7 +38,7 @@ src/bookmap/
   store/db.py    DuckDB store — all SQL lives here
   store/projection.py   DuckDB -> Arrow -> scipy.sparse (never a Python row loop)
   sources/       one file per upstream dump; adapters know nothing about storage
-  graph/         build (fusion), ppr, communities, centrality, layout
+  graph/         build (fusion), ppr, communities, centrality, layout, connect
   recommend.py   resolve seeds -> PPR -> hub damping -> filter -> MMR -> explain
   explain.py     shortest paths, cost = -log(weight)
   web/           FastAPI + a canvas renderer in static/
