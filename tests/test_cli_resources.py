@@ -44,6 +44,43 @@ class TestResourceOptions:
         )
         assert result.exit_code == 0, result.output
 
+    def test_every_write_side_command_accepts_them(self) -> None:
+        """One command referencing options it never declared is a NameError.
+
+        ``ingest openlibrary`` passed ``temp_dir``, ``memory_limit`` and
+        ``max_temp_size`` to ``_resources`` without taking them as parameters, so
+        it raised on *any* invocation. Nothing caught it because no test ran the
+        command and the names only resolve at call time. Every command that opens
+        the store for writing is checked here rather than one of them.
+        """
+        for command in (
+            ["ingest", "demo"],
+            ["ingest", "goodreads-ucsd"],
+            ["ingest", "amazon-meta"],
+            ["ingest", "amazon-reviews"],
+            ["ingest", "openlibrary"],
+            ["build"],
+        ):
+            result = runner.invoke(app, [*command, "--help"])
+            assert result.exit_code == 0, f"{command}: {result.output}"
+            for option in ("--temp-dir", "--memory-limit", "--max-temp-size"):
+                assert option in result.output, f"{command} is missing {option}"
+
+    def test_openlibrary_reaches_the_store(self, tmp_path: Path) -> None:
+        """The command must get as far as opening the database.
+
+        With ``--limit 0`` there is nothing to fetch, so this exercises the
+        signature and the store handoff without any network access.
+        """
+        db = tmp_path / "t.duckdb"
+        assert runner.invoke(app, ["ingest", "demo", "--db", str(db)]).exit_code == 0
+        result = runner.invoke(
+            app,
+            ["ingest", "openlibrary", "--db", str(db), "--limit", "0",
+             "--temp-dir", str(tmp_path / "spill"), "--memory-limit", "2GB"],
+        )
+        assert result.exit_code == 0, result.output
+
     def test_options_are_documented(self) -> None:
         """A knob nobody can find does not solve the problem it was added for."""
         for command in (["ingest", "goodreads-ucsd", "--help"], ["build", "--help"]):

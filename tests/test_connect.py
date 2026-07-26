@@ -28,6 +28,7 @@ from bookmap.graph.connect import (
     Connections,
     connect_seeds,
     cost_matrix,
+    metric_closure,
 )
 from tests.helpers import make_projection
 
@@ -129,6 +130,60 @@ class TestMetricClosure:
             for u, v in zip(leg.path, leg.path[1:], strict=False):
                 product *= weights.get((u, v)) or weights[(v, u)]
             assert leg.strength == pytest.approx(product)
+
+
+class TestMetricClosureFunction:
+    """The closure is readable on its own, without drawing anything.
+
+    Exposed separately because "how far apart are these two genres" is a real
+    question with a numeric answer, and because the CLI needs it to say *which*
+    pairs it could not join.
+    """
+
+    def test_distances_match_networkx(self, chain) -> None:
+        oracle = _nx_with_costs(CHAIN_PAIRS)
+        closure = metric_closure(chain, ["sf2", "phil2", "lit1"])
+        for (a, b), cost in closure.items():
+            expected = nx.shortest_path_length(oracle, a, b, weight="cost")
+            assert cost == pytest.approx(expected)
+
+    def test_is_symmetric(self, chain) -> None:
+        closure = metric_closure(chain, ["sf2", "phil2"])
+        assert closure[("sf2", "phil2")] == pytest.approx(closure[("phil2", "sf2")])
+
+    def test_unreachable_pair_is_infinite_not_absent(self) -> None:
+        """A missing key would make "different components" look like "not asked"."""
+        projection = make_projection([("a", "b", 0.9), ("x", "y", 0.9)])
+        closure = metric_closure(projection, ["a", "x"])
+        assert math.isinf(closure[("a", "x")])
+
+    def test_unknown_seed_is_infinite_against_everything(self, chain) -> None:
+        closure = metric_closure(chain, ["sf2", "not-a-book"])
+        assert math.isinf(closure[("sf2", "not-a-book")])
+
+    def test_a_single_terminal_has_no_pairs(self, chain) -> None:
+        assert metric_closure(chain, ["sf2"]) == {}
+
+
+class TestLegsAcrossSkeletons:
+    def test_legs_aggregates_every_component(self) -> None:
+        """A caller narrating the routes wants all of them, not one component's."""
+        pairs = [
+            ("a1", "a2", 0.5), ("a2", "a3", 0.5),
+            ("b1", "b2", 0.5), ("b2", "b3", 0.5),
+        ]
+        result = connect_seeds(make_projection(pairs), ["a1", "a3", "b1", "b3"])
+        assert len(result.skeletons) == 2
+        assert result.legs == tuple(
+            leg for skeleton in result.skeletons for leg in skeleton.legs
+        )
+        assert {(leg.source, leg.target) for leg in result.legs} == {
+            ("a1", "a3"),
+            ("b1", "b3"),
+        }
+
+    def test_no_skeletons_means_no_legs(self, chain) -> None:
+        assert connect_seeds(chain, ["sf1"]).legs == ()
 
 
 class TestSkeletonAgainstNetworkX:

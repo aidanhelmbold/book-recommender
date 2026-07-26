@@ -167,6 +167,15 @@ class Connections:
                 seen.setdefault(node, None)
         return tuple(seen)
 
+    @property
+    def legs(self) -> tuple[Leg, ...]:
+        """Every route across every group, for prose output and for tests.
+
+        Flattened because a caller narrating "how do these connect" wants the
+        routes, not the component structure they happen to fall into.
+        """
+        return tuple(leg for skeleton in self.skeletons for leg in skeleton.legs)
+
 
 def cost_matrix(projection: GraphProjection) -> sp.csr_matrix:
     """The adjacency re-expressed as shortest-path costs, ``-log(weight)``.
@@ -188,6 +197,43 @@ def cost_matrix(projection: GraphProjection) -> sp.csr_matrix:
         (costs, (adjacency.row[keep], adjacency.col[keep])),
         shape=adjacency.shape,
     )
+
+
+def metric_closure(
+    projection: GraphProjection,
+    terminals: list[str] | tuple[str, ...],
+) -> dict[tuple[str, str], float]:
+    """Shortest-path cost between every ordered pair of terminals.
+
+    Steps 1-2 of KMB, exposed on its own because the distances are worth reading
+    without drawing anything: they say how far apart two genres are, in the same
+    ``-log(weight)`` units the explanations use. Unreachable and unknown pairs
+    are ``inf`` rather than absent -- a missing key makes "different components"
+    indistinguishable from "never asked for", and callers compare rather than
+    branch.
+    """
+    wanted: dict[str, int] = {}
+    for work_id in terminals:
+        row = projection.index.get(work_id)
+        if row is not None:
+            wanted.setdefault(work_id, row)
+
+    closure = {
+        (a, b): math.inf
+        for a in dict.fromkeys(terminals)
+        for b in dict.fromkeys(terminals)
+        if a != b
+    }
+    if len(wanted) < 2:
+        return closure
+
+    rows = np.fromiter(wanted.values(), dtype=np.int64, count=len(wanted))
+    distances = dijkstra(cost_matrix(projection), directed=False, indices=rows)
+    for i, a in enumerate(wanted):
+        for j, b in enumerate(wanted):
+            if a != b:
+                closure[(a, b)] = float(distances[i][rows[j]])
+    return closure
 
 
 def connect_seeds(
@@ -348,7 +394,6 @@ def _skeleton(
     paths: dict[tuple[int, int], list[int]],
 ) -> Skeleton:
     """Steps 3-5 for one group: MST the closure, expand, union, MST, prune."""
-    local = {terminal: position for position, terminal in enumerate(members)}
     sub = closure[members, :][:, members]
     chosen = minimum_spanning_tree(sub).tocoo()
 

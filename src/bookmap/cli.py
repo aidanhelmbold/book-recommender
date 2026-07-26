@@ -25,8 +25,9 @@ from rich.table import Table
 
 from bookmap.config import DEFAULT_DB_PATH, GraphConfig, LayoutConfig, RecommendConfig
 from bookmap.explain import format_explanation
+from bookmap.graph.connect import DEFAULT_MAX_HOPS
 from bookmap.identity import normalize_title
-from bookmap.recommend import RecommendResult, resolve_seeds
+from bookmap.recommend import RecommendResult
 from bookmap.recommend import recommend as run_recommend
 from bookmap.store.db import Store
 
@@ -412,7 +413,13 @@ def ingest_amazon_reviews(
 
 
 @ingest_app.command("openlibrary")
-def ingest_openlibrary(db: str = DEFAULT_DB_PATH, limit: int | None = None) -> None:
+def ingest_openlibrary(
+    db: str = DEFAULT_DB_PATH,
+    limit: int | None = None,
+    temp_dir: str | None = TEMP_DIR_OPT,
+    memory_limit: str | None = MEMORY_LIMIT_OPT,
+    max_temp_size: str | None = MAX_TEMP_OPT,
+) -> None:
     """Enrich stored books with Open Library metadata."""
     import asyncio
 
@@ -1034,3 +1041,108 @@ def bridges(
             connects,
         )
     console.print(table)
+
+
+# -- connect ---------------------------------------------------------------
+
+
+@app.command()
+def connect(
+    seeds: str = typer.Option(..., help='Comma-separated book titles, e.g. "Dune,Emma".'),
+    db: str = DEFAULT_DB_PATH,
+    max_hops: int = typer.Option(
+        DEFAULT_MAX_HOPS,
+        "--max-hops",
+        help="Longest route to report between two books.",
+    ),
+    json_out: bool = typer.Option(False, "--json", help="Emit JSON instead of prose."),
+) -> None:
+    """Show how a set of books connects, and name the books doing the joining.
+
+    Recommendation answers "what is near these"; this answers "what is *between*
+    them". The route is the minimum-weight subtree joining the seeds — a Steiner
+    tree — so the intermediate books are the ones that link one genre to another.
+    Cost is -log(weight), which makes the cheapest route the strongest chain of
+    connections rather than merely the shortest.
+    """
+    from bookmap.connections import ConnectionsUnavailable, find_connections
+    from bookmap.store.projection import project
+
+    queries = _split_seeds(seeds)
+    if not queries:
+        _fail("--seeds must name at least one book")
+
+    with _open_readable(db) as store:
+        projection = project(store)
+        try:
+            payload = find_connections(
+                store, projection, seeds=queries, max_hops=max_hops
+            )
+        except ConnectionsUnavailable as exc:
+            _fail(str(exc))
+            raise  # unreachable
+
+    if json_out:
+        # Nothing else may reach stdout in this mode: the output is parsed.
+        typer.echo(json.dumps(payload, indent=2))
+        return
+
+    _print_connections(payload)
+
+
+def _print_connections(payload: dict[str, Any]) -> None:
+    for seed in payload["seeds"]:
+        author = ", ".join(seed["authors"])
+        label = f"{seed['title']} — {author}" if author else seed["title"]
+        console.print(f"[dim]seed[/dim] {markup_escape(str(label))}")
+
+    if payload["unresolved"]:
+        # A seed the user thought they gave you changes the answer by its absence.
+        console.print(
+            "[yellow]no match for:[/yellow] "
+            + markup_escape(", ".join(payload["unresolved"]))
+        )
+
+    if len(payload["seeds"]) < 2:
+        console.print(
+            "[yellow]name at least two books:[/yellow] a connection needs two ends, "
+            "so there is nothing to connect here."
+        )
+        return
+
+    for skeleton in payload["skeletons"]:
+        console.print()
+        for leg in skeleton["legs"]:
+            # The quotable form. Titles rather than ids, and the whole route on one
+            # line, because this is the sentence people repeat back.
+            route = " → ".join(markup_escape(title) for title in leg["titles"])
+            console.print(
+                f"{route}  [dim]({leg['hops']} hops, "
+                f"strength {leg['strength']:.4f})[/dim]"
+            )
+
+        if skeleton["connectors"]:
+            console.print("\n[bold]connecting books[/bold]")
+            for position, node in enumerate(skeleton["connectors"], start=1):
+                console.print(f"  {position:>2}  {markup_escape(node['title'])}")
+
+    if payload["capped"]:
+        # Refused for length, not shortened: a truncated path is a false claim
+        # about the route, while "further apart than N hops" is true and useful.
+        console.print()
+        for pair in payload["capped"]:
+            console.print(
+                f"[yellow]further apart than {pair['limit']} hops:[/yellow] "
+                f"{markup_escape(pair['source_title'])} and "
+                f"{markup_escape(pair['target_title'])} "
+                f"[dim]({pair['hops']} hops apart)[/dim]"
+            )
+
+    if payload["unjoined"]:
+        names = ", ".join(pair["title"] for pair in payload["unjoined"])
+        console.print(
+            f"[yellow]could not be joined to the others:[/yellow] {markup_escape(names)}"
+        )
+
+    if not payload["skeletons"]:
+        console.print("[yellow]no route found between these books[/yellow]")
