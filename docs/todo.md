@@ -127,13 +127,16 @@ is the case against the product objective as a default.
 **What is still needed:** the same comparison on the real 392k-node graph.
 `bookmap route-report` gathers it in one command — a battery of probe seed sets
 under all three objectives, with the resolved seed titles, the weakest link on each
-route, and a per-objective timing, as markdown. Two things to watch there. First, whether `widest` derives a *usable* floor — on a
-graph with 5.1M edges the weakest necessary link across a seed set may be so low
-that the floor does nothing. Second, cost: `widest` adds a maximum spanning tree
-over the whole graph plus a second Dijkstra pass, which is untimed at real scale
-and may be too slow for a web request even if it is fine for the CLI. Neither
-`--objective` nor `--min-edge-weight` changes any default yet, precisely because
-that decision needs the real numbers.
+route, and a per-objective timing, as markdown.
+
+Two things to watch in that report. First, whether `widest` derives a *usable*
+floor — on a graph with 5.1M edges the weakest necessary link across a seed set may
+be so low that the floor does nothing. Second, cost: `widest` adds a maximum
+spanning tree over the whole graph plus a second Dijkstra pass, and the report's
+timings are the measurement of whether that is affordable in a web request.
+
+Neither `--objective` nor `--min-edge-weight` changes any default yet, precisely
+because that decision needs the real numbers.
 
 Reported strength does at least make a weak route visibly weak (0.0473 against a
 direct edge's 0.13–0.38), so nothing is hidden from the reader.
