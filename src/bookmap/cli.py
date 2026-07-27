@@ -1235,3 +1235,171 @@ def _print_routes(payload: dict[str, Any]) -> None:
 
     if not payload["skeletons"]:
         console.print("[yellow]no route found between these books[/yellow]")
+
+
+# -- route-report ----------------------------------------------------------
+
+
+DEFAULT_PROBES = (
+    # A close pair, first, as the sanity check: these two should be adjacent or a
+    # hop apart, and anything baroque here is a bug rather than a tuning question.
+    "Dune,Foundation",
+    # Two genres that genuinely do not touch -- the headline case.
+    "Dune,Pride and Prejudice",
+    # Fiction to non-fiction, where the corpus is thinnest.
+    "Dune,Sapiens: A Brief History of Humankind",
+    # The original example from docs/plan-connections.md.
+    "Dune,Emma,Zen and the Art of Motorcycle Maintenance",
+    # Three-way across unrelated genres, the case that read worst.
+    "The Hobbit,Gone Girl,Meditations",
+)
+"""Seed sets chosen to probe different failure modes, not to flatter the graph.
+
+Titles a large real corpus is very likely to contain. Any that do not resolve are
+reported rather than skipped, since a missing probe changes what the report means.
+"""
+
+
+@app.command("route-report")
+def route_report(
+    db: str = DEFAULT_DB_PATH,
+    sets: list[str] = typer.Option(  # noqa: B008 - typer's option signature
+        None,
+        "--sets",
+        help='A comma-separated seed set. Repeatable. Defaults to a built-in battery.',
+    ),
+    out: str | None = typer.Option(None, "--out", help="Also write the report here."),
+    max_hops: int = typer.Option(DEFAULT_MAX_HOPS, "--max-hops"),
+    floor: float = typer.Option(
+        _COMPARE_FLOOR, "--floor", help="Edge-weight floor for the middle variant."
+    ),
+) -> None:
+    """Compare route objectives across several seed sets, as a markdown report.
+
+    Exists because judging whether a route is *meaningful* needs a human who knows
+    the books, and the only expensive part of that loop is gathering the evidence.
+    Every seed set is run under all three objectives against one projection, with
+    the resolved seed titles and the weakest link on each route, so the judgement
+    can be made from the page without re-running anything.
+
+    Timings are per objective on the real graph, which is the honest way to find out
+    whether `widest` is affordable in a web request.
+    """
+    import time
+
+    from bookmap.connections import ConnectionsUnavailable, find_connections
+    from bookmap.store.projection import project
+
+    probes = list(sets) if sets else list(DEFAULT_PROBES)
+    parsed: list[list[str]] = []
+    for probe in probes:
+        queries = _split_seeds(probe)
+        if len(queries) < 2:
+            _fail(f"each --sets value needs at least two books: {probe!r}")
+        parsed.append(queries)
+
+    variants = (
+        ("product", PRODUCT, 0.0),
+        ("product + floor", PRODUCT, floor),
+        ("widest", WIDEST, 0.0),
+    )
+
+    lines: list[str] = ["# Route comparison", ""]
+    with _open_readable(db) as store:
+        projection = project(store)
+        if projection.n_nodes == 0:
+            _fail("the graph is empty: run 'bookmap build' first")
+        lines.append(
+            f"Graph: {projection.n_nodes:,} nodes · {projection.n_edges:,} edges · "
+            f"max hops {max_hops} · floor {floor}"
+        )
+        lines.append("")
+
+        for queries in parsed:
+            lines.append(f"## {', '.join(queries)}")
+            lines.append("")
+            first = True
+            for label, objective, variant_floor in variants:
+                started = time.perf_counter()
+                try:
+                    payload = find_connections(
+                        store,
+                        projection,
+                        seeds=queries,
+                        max_hops=max_hops,
+                        objective=objective,
+                        min_edge_weight=variant_floor,
+                    )
+                except ConnectionsUnavailable as exc:
+                    _fail(str(exc))
+                    raise  # unreachable
+                elapsed = time.perf_counter() - started
+
+                if first:
+                    # Once per set, not once per variant: seeds resolve identically
+                    # across objectives, and printing it once is the evidence that
+                    # the three really are being compared on the same books.
+                    lines.extend(_report_seed_lines(payload))
+                    first = False
+                    usable = len(payload["seeds"]) - len(payload["missing"])
+                    if usable < 2:
+                        # The objectives cannot differ on a set that has no two ends
+                        # to join, and printing a graph-shaped "no route found" once
+                        # per objective would blame the graph for a seed problem.
+                        lines.append(
+                            "*fewer than two usable seeds — nothing to route between*"
+                        )
+                        lines.append("")
+                        break
+
+                lines.append(f"**{label}** — {elapsed:.2f} seconds")
+                lines.append("")
+                lines.extend(_report_routes(payload))
+                lines.append("")
+
+    body = "\n".join(lines).rstrip() + "\n"
+    if out is not None:
+        Path(out).write_text(body, encoding="utf-8")
+        console.print(f"[green]wrote[/green] {out}")
+    # Plain print, not console.print: rich would wrap the routes and rewrap the
+    # markdown, and this output exists to be copied verbatim.
+    typer.echo(body)
+
+
+def _report_seed_lines(payload: dict[str, Any]) -> list[str]:
+    resolved = "; ".join(
+        f"{seed['title']} — {', '.join(seed['authors']) or 'unknown'}"
+        for seed in payload["seeds"]
+    )
+    lines = [f"seeds resolved: {resolved or 'none'}", ""]
+    if payload["unresolved"]:
+        lines[0:0] = [f"**no match for: {', '.join(payload['unresolved'])}**", ""]
+    if payload["missing"]:
+        names = ", ".join(entry["title"] for entry in payload["missing"])
+        lines[0:0] = [f"**not in the graph: {names}**", ""]
+    return lines
+
+
+def _report_routes(payload: dict[str, Any]) -> list[str]:
+    lines: list[str] = []
+    for skeleton in payload["skeletons"]:
+        for leg in skeleton["legs"]:
+            lines.append("```")
+            lines.append(" → ".join(leg["titles"]))
+            lines.append(
+                f"{leg['hops']} hops · strength {leg['strength']:.4f} · "
+                f"weakest link {leg['bottleneck']:.3f}"
+            )
+            lines.append("```")
+    for pair in payload["capped"]:
+        lines.append(
+            f"- further apart than {pair['limit']} hops: "
+            f"{pair['source_title']} and {pair['target_title']} "
+            f"({pair['hops']} hops apart)"
+        )
+    if payload["unjoined"]:
+        names = ", ".join(entry["title"] for entry in payload["unjoined"])
+        lines.append(f"- could not be joined: {names}")
+    if not lines:
+        lines.append("- no route found")
+    return lines

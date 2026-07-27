@@ -124,8 +124,10 @@ widest           Dune → Do Androids Dream of Electric Sheep? → The Left Hand
 The second is longer and lower-probability and is plainly the better answer, which
 is the case against the product objective as a default.
 
-**What is still needed:** the same comparison on the real 392k-node graph. Two
-things to watch there. First, whether `widest` derives a *usable* floor — on a
+**What is still needed:** the same comparison on the real 392k-node graph.
+`bookmap route-report` gathers it in one command — a battery of probe seed sets
+under all three objectives, with the resolved seed titles, the weakest link on each
+route, and a per-objective timing, as markdown. Two things to watch there. First, whether `widest` derives a *usable* floor — on a
 graph with 5.1M edges the weakest necessary link across a seed set may be so low
 that the floor does nothing. Second, cost: `widest` adds a maximum spanning tree
 over the whole graph plus a second Dijkstra pass, which is untimed at real scale

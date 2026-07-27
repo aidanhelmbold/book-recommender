@@ -21,7 +21,7 @@ $ uv run bookmap recommend --seeds "Dune,Hyperion" -n 4
 
 There is also an interactive map: `uv run bookmap web`.
 
-**Status:** complete and green — 515 tests, including scale tests over 20M-edge
+**Status:** complete and green — 531 tests, including scale tests over 20M-edge
 synthetic graphs. Verified on the bundled corpus, on a 100k-record slice of the
 real dump, and at synthetic scale. **A full 9.2 GB run has not yet completed end
 to end.** See `docs/todo.md` for open items and known compromises, and
@@ -240,6 +240,7 @@ parameters can be retuned and the graph rebuilt without re-ingesting anything.
 | `bookmap bridges` | Books linking two otherwise-separate reading communities |
 | `bookmap connect --seeds "A,B,C"` | The route between books, and what joins them |
 | `bookmap connect --compare` | The same route under each objective, side by side |
+| `bookmap route-report` | A markdown report over a battery of seed sets |
 | `bookmap stats` | Graph size, degree distribution, communities |
 
 Write-side commands take `--temp-dir`, `--memory-limit` and `--max-temp-size`.
@@ -254,7 +255,7 @@ a planted-partition graph for community detection, hand-computed arithmetic for
 fusion weights, real ISBN check digits for identity resolution.
 
 ```bash
-uv run pytest              # 515 tests
+uv run pytest              # 531 tests
 uv run pytest -m slow      # scale tests: 20M-row resolution, 500k-node PPR
 ```
 
